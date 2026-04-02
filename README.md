@@ -10,7 +10,6 @@ orbita-mobile/
 │  └──  (tabs)/            # Telas acessíveis por tabs
 ├── assets/                # Arquivos estáticos
 ├── components/            # Componentes criados
-├── components/            # Componentes criados
 ├── hooks/                 # Hooks criados para o projeto
 ├── package-lock.json      # Dependências do projeto
 ├── package.json           # Dependências do projeto
