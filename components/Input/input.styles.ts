@@ -9,7 +9,7 @@ export default StyleSheet.create({
     borderRadius: 50,
     paddingHorizontal: 14,
     paddingVertical: 8,
-    marginBottom: 12,
+    marginBottom: 16,
     borderWidth: 2,
     borderColor: 'transparent',
   },

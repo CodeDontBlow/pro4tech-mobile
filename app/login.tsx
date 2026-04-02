@@ -5,66 +5,64 @@ import Button from '@/components/Button/Button';
 import InputField from '@/components/Input/Input';
 import Colors from '@/constants/colors';
 
-export default function Cadastro() {
-  const [name, setName] = useState('');
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [hasError, setHasError] = useState(false);
 
-  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+  const handleLogin = () => {
+    // validação temporária — integrar com backend depois
+    if (!email || !password) {
+      setHasError(true);
+      return;
+    }
+    setHasError(false);
+    router.push('/(tabs)');
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
         <Image
           source={require('../assets/logos/Orbi.png')}
-          style={{ width: 150, height: 150 }}
+          style={styles.logo}
           resizeMode="contain"
         />
       </View>
 
-      <Text style={styles.title}>Cadastrar</Text>
+      <Text style={styles.title}>Entrar</Text>
 
-      <InputField
-        placeholder="Nome"
-        icon="person-outline"
-        value={name}
-        onChangeText={setName}
-      />
       <InputField
         placeholder="E-mail"
         icon="mail-outline"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => { setEmail(text); setHasError(false); }}
       />
       <InputField
         placeholder="Senha"
         icon="lock-closed-outline"
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => { setPassword(text); setHasError(false); }}
         secureTextEntry
-      />
-      <InputField
-        placeholder="Digite novamente sua senha"
-        icon="lock-closed-outline"
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        secureTextEntry
-        isError={passwordMismatch}
+        isError={hasError}
       />
 
-      {passwordMismatch && (
-        <Text style={styles.errorText}>As senhas não coincidem</Text>
+      <Text style={styles.forgotPassword}>Esqueci minha senha</Text>
+
+      {hasError && (
+        <Text style={styles.errorText}>
+          E-mail ou senha incorretos.{'\n'}Tente novamente
+        </Text>
       )}
 
       <View style={styles.buttonContainer}>
-        <Button label="Criar conta" onPress={() => {}} />
+        <Button label="Entrar" onPress={handleLogin} />
       </View>
 
       <Text style={styles.linkText}>
-        Já tem uma conta?{' '}
-        <Text style={styles.link} onPress={() => router.push('/')}>
-          Entrar
+        Não tem uma conta?{' '}
+        <Text style={styles.link} onPress={() => router.push('/cadastro')}>
+          Cadastrar
         </Text>
       </Text>
 
@@ -84,12 +82,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 16,
   },
+  logo: {
+    width: 150,
+    height: 150,
+  },
   title: {
     fontSize: 36,
     fontWeight: '500',
     color: Colors.teal.base,
     textAlign: 'center',
     marginBottom: 32,
+  },
+  forgotPassword: {
+    color: Colors.teal.base,
+    fontSize: 14,
+    textAlign: 'right',
+    marginTop: -8,
+    marginBottom: 18,
+    fontWeight: 'bold',
   },
   errorText: {
     color: Colors.red.base,
