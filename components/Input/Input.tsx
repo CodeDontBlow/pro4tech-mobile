@@ -29,6 +29,7 @@ export default function InputField({
         size={18}
         color={styles.icon.color}
         style={styles.icon}
+        pointerEvents="none" 
       />
       <TextInput
         style={styles.input}

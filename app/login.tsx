@@ -4,6 +4,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/Input/Input';
 import Colors from '@/constants/colors';
+import { globalStyles } from '@/constants/globalStyles';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -30,7 +31,7 @@ export default function Login() {
         />
       </View>
 
-      <Text style={styles.title}>Entrar</Text>
+      <Text style={[globalStyles.title2, styles.title]}>Entrar</Text>
 
       <InputField
         placeholder="E-mail"
@@ -47,10 +48,10 @@ export default function Login() {
         isError={hasError}
       />
 
-      <Text style={styles.forgotPassword}>Esqueci minha senha</Text>
+      <Text style={[globalStyles.label2, styles.forgotPassword]}>Esqueci minha senha</Text>
 
       {hasError && (
-        <Text style={styles.errorText}>
+        <Text style={[globalStyles.label1, styles.errorText]}>
           E-mail ou senha incorretos.{'\n'}Tente novamente
         </Text>
       )}
@@ -59,14 +60,14 @@ export default function Login() {
         <Button label="Entrar" onPress={handleLogin} />
       </View>
 
-      <Text style={styles.linkText}>
+      <Text style={[globalStyles.text2, styles.linkText]}>
         Não tem uma conta?{' '}
         <Text style={styles.link} onPress={() => router.push('/cadastro')}>
           Cadastrar
         </Text>
       </Text>
 
-      <Text style={[styles.link, { marginTop: 8 }]}>Preciso de ajuda</Text>
+      <Text style={[globalStyles.text2, styles.link]}>Preciso de ajuda</Text>
     </View>
   );
 }
@@ -87,15 +88,12 @@ const styles = StyleSheet.create({
     height: 150,
   },
   title: {
-    fontSize: 36,
-    fontWeight: '500',
     color: Colors.teal.base,
     textAlign: 'center',
     marginBottom: 32,
   },
   forgotPassword: {
     color: Colors.teal.base,
-    fontSize: 14,
     textAlign: 'right',
     marginTop: -8,
     marginBottom: 18,
@@ -103,7 +101,6 @@ const styles = StyleSheet.create({
   },
   errorText: {
     color: Colors.red.base,
-    fontSize: 13,
     textAlign: 'center',
     marginBottom: 12,
     fontWeight: 'bold',
@@ -113,14 +110,13 @@ const styles = StyleSheet.create({
   },
   linkText: {
     textAlign: 'center',
-    fontSize: 16,
     color: Colors.black.base,
   },
   link: {
     color: Colors.teal.base,
     textAlign: 'center',
-    fontSize: 16,
-    paddingVertical: 8,
+    paddingVertical: 10,
     textDecorationLine: 'underline',
+    marginTop: 20
   },
 });

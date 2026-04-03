@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import Colors from '../../constants/colors';
+import { globalStyles } from '@/constants/globalStyles';
 
 export default StyleSheet.create({
   button: {
@@ -16,7 +17,6 @@ export default StyleSheet.create({
   },
   buttonText: {
     color: Colors.white[300],
-    fontSize: 18,
-    fontWeight: '500',
+    ...globalStyles.subtitle,
   },
 });

@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import Colors from '../../constants/colors';
+import { globalStyles } from '@/constants/globalStyles';
 
 export default StyleSheet.create({
   container: {
@@ -22,8 +23,10 @@ export default StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 14,
+      ...globalStyles.label1,
     color: Colors.white[300],
+    paddingLeft: 6,
+    minHeight: 20,
   },
   placeholder: {
     color: Colors.white[300],
