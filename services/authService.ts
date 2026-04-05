@@ -1,5 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
-import api from './api';
+import api, { storage } from './api';
 
 type RegisterPayload = {
   name: string;
@@ -34,14 +33,14 @@ export const authService = {
 
   async login(payload: LoginPayload): Promise<void> {
     const { data } = await api.post<LoginResponse>('/auth/login', payload);
-    await SecureStore.setItemAsync('orbita_token', data.access_token);
+    await storage.setItem('orbita_token', data.access_token);
   },
 
   async logout(): Promise<void> {
-    await SecureStore.deleteItemAsync('orbita_token');
+    await storage.deleteItem('orbita_token');
   },
 
   async getToken(): Promise<string | null> {
-    return SecureStore.getItemAsync('orbita_token');
+    return storage.getItem('orbita_token');
   },
 };
