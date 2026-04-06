@@ -36,12 +36,12 @@ export default function Triagem() {
 
       const data = await response.json();
 
-      if (data.isLeaf) {
-        router.push({ 
-          pathname: '/(tabs)/history', 
-          params: { groupId: data.targetGroupId } 
-        });
-      } else {
+  if (data.isLeaf) {
+    router.push({ 
+      pathname: '/(user)/(tabs)/history',
+      params: { groupId: data.targetGroupId } 
+    });
+  } else {
         setNode(data);
       }
     } catch (err) {
