@@ -1,9 +1,10 @@
 import Button from '@/components/Button/Button';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import api from '@/services/api';
 import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View, Image } from 'react-native';
+import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 export default function Triagem() {
   const [node, setNode] = useState<any>(null);
@@ -11,50 +12,49 @@ export default function Triagem() {
 
   const fetchFirstQuestion = async () => {
     setLoading(true);
-    try {
-      const response = await fetch('http://localhost:3333/triage-rules/root');
-      
-      if (!response.ok) throw new Error("Falha ao buscar raiz");
-      
-      const data = await response.json();
-      setNode(data);
-    } catch (err) {
-      console.error("Erro ao carregar início:", err);
-    } finally {
-      setLoading(false);
-    }
+    api.get('/triage-rules/root')
+      .then((res: any) => setNode(res.data))
+      .catch((err: any) => console.error('Erro ao ler o nó root', err))
+      .finally(() => setLoading(false));
   };
-
+  
   const handleAnswer = async (option: any) => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3333/triage-rules/${node.id}/traverse`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answerTrigger: option.answerTrigger })
+      const response = await api.post(`/triage-rules/${node.id}/traverse`, {
+        answerTrigger: option.answerTrigger
       });
 
-      const data = await response.json();
+      const data = response.data;
 
-  if (data.isLeaf) {
-    router.push({ 
-      pathname: '/(user)/(tabs)/history',
-      params: { groupId: data.targetGroupId } 
-    });
-  } else {
+      if (data.isLeaf) {
+        router.push({ 
+          pathname: '/(user)/triage-end',
+          params: { 
+            groupId: data.targetGroupId,
+            subjectId: data.subjectId,
+          } 
+        });
+      } else {
         setNode(data);
       }
     } catch (err) {
-      console.error("Erro ao responder:", err);
+      console.error("Erro na triagem:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  useEffect(() => { fetchFirstQuestion(); }, []);
+  useEffect(() => { 
+    fetchFirstQuestion() 
+  }, [])
 
   if (loading && !node) {
-    return <View style={styles.center}><ActivityIndicator size="large" color={Colors.teal.base} /></View>;
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color={Colors.teal.base} />
+      </View>
+    )
   }
 
   return (
@@ -62,7 +62,7 @@ export default function Triagem() {
       <View style={styles.content}>
         <View style={styles.logoContainer}>
         <Image
-          source={require('../assets/logos/Orbi.png')}
+          source={require('../../assets/logos/Orbi.png')}
           style={styles.logo}
           resizeMode="contain"
         />
@@ -119,4 +119,4 @@ const styles = StyleSheet.create({
     width: '100%', 
     gap: 12 
   }
-});
+})
