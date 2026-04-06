@@ -5,14 +5,51 @@ import Button from '@/components/Button/Button';
 import InputField from '@/components/Input/Input';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import { authService } from '@/services/authService';
+
+const TEMP_COMPANY_ID = '019d6059-53c9-7553-afa7-2cc9236d61e9'; // ID mockado para testes
 
 export default function Cadastro() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+
+  const handleRegister = async () => {
+    if (!name || !email || !password || !confirmPassword) {
+      setHasError(true);
+      setErrorMessage('Preencha todos os campos.');
+      return;
+    }
+    if (passwordMismatch) {
+      setHasError(true);
+      setErrorMessage('As senhas não coincidem.');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setHasError(false);
+      await authService.register({
+        name,
+        email,
+        password,
+        companyId: TEMP_COMPANY_ID,
+        role: 'CLIENT',
+      });
+      router.push('/login');
+    } catch (error: any) {
+      setHasError(true);
+      setErrorMessage(error.response?.data?.message || 'Não foi possível criar a conta.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -30,41 +67,50 @@ export default function Cadastro() {
         placeholder="Nome"
         icon="person-outline"
         value={name}
-        onChangeText={setName}
+        onChangeText={(text) => { setName(text); setHasError(false); }}
+        isError={hasError && !name}
       />
       <InputField
         placeholder="E-mail"
         icon="mail-outline"
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => { setEmail(text); setHasError(false); }}
+        isError={hasError && !email}
       />
       <InputField
         placeholder="Senha"
         icon="lock-closed-outline"
         value={password}
-        onChangeText={setPassword}
+        onChangeText={(text) => { setPassword(text); setHasError(false); }}
         secureTextEntry
+        isError={hasError && (!password || passwordMismatch)}
       />
       <InputField
         placeholder="Digite novamente sua senha"
         icon="lock-closed-outline"
         value={confirmPassword}
-        onChangeText={setConfirmPassword}
+        onChangeText={(text) => { setConfirmPassword(text); setHasError(false); }}
         secureTextEntry
-        isError={passwordMismatch}
+        isError={hasError && (passwordMismatch || !confirmPassword)}
       />
 
-      {passwordMismatch && (
-        <Text style={[globalStyles.label1, styles.errorText]}>As senhas não coincidem</Text>
+      {hasError && (
+        <Text style={[globalStyles.label1, styles.errorText]}>
+          {errorMessage}
+        </Text>
       )}
 
       <View style={styles.buttonContainer}>
-        <Button label="Criar conta" onPress={() => {}} />
+        <Button
+          label={isLoading ? 'Criando conta...' : 'Criar conta'}
+          onPress={handleRegister}
+          disabled={isLoading}
+        />
       </View>
 
       <Text style={[globalStyles.text2, styles.linkText]}>
         Já tem uma conta?{' '}
-        <Text style={styles.link} onPress={() => router.push('/')}>
+        <Text style={styles.link} onPress={() => router.push('/login')}>
           Entrar
         </Text>
       </Text>
@@ -112,6 +158,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 10,
     textDecorationLine: 'underline',
-    marginTop: 15
+    marginTop: 15,
   },
 });

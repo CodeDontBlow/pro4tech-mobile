@@ -5,20 +5,33 @@ import Button from '@/components/Button/Button';
 import InputField from '@/components/Input/Input';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import { authService } from '@/services/authService';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('E-mail ou senha incorretos.\nTente novamente');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    // validação temporária — integrar com backend depois
+  const handleLogin = async () => {
     if (!email || !password) {
       setHasError(true);
+      setErrorMessage('Preencha todos os campos.');
       return;
     }
-    setHasError(false);
-    router.push('/(tabs)');
+
+    try {
+      setIsLoading(true);
+      setHasError(false);
+      await authService.login({ email, password });
+      router.replace('/(user)/(tabs)');
+    } catch (error: any) {
+      setHasError(true);
+      setErrorMessage(error.response?.data?.message || 'E-mail ou senha incorretos.\nTente novamente');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,12 +65,16 @@ export default function Login() {
 
       {hasError && (
         <Text style={[globalStyles.label1, styles.errorText]}>
-          E-mail ou senha incorretos.{'\n'}Tente novamente
+          {errorMessage}
         </Text>
       )}
 
       <View style={styles.buttonContainer}>
-        <Button label="Entrar" onPress={handleLogin} />
+        <Button
+          label={isLoading ? 'Entrando...' : 'Entrar'}
+          onPress={handleLogin}
+          disabled={isLoading}
+        />
       </View>
 
       <Text style={[globalStyles.text2, styles.linkText]}>
@@ -117,6 +134,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 10,
     textDecorationLine: 'underline',
-    marginTop: 20
+    marginTop: 20,
   },
 });
