@@ -75,3 +75,4 @@ google-services.json
 
 # Android Profiling
 *.hprof
+.env

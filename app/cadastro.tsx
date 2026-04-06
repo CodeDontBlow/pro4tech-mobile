@@ -7,7 +7,7 @@ import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import { authService } from '@/services/authService';
 
-const TEMP_COMPANY_ID = '019d5477-dc02-7227-a8b2-c94c0f85e7b1'; // ID mockado para testes
+const TEMP_COMPANY_ID = '019d6059-53c9-7553-afa7-2cc9236d61e9'; // ID mockado para testes
 
 export default function Cadastro() {
   const [name, setName] = useState('');

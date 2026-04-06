@@ -3,8 +3,8 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 const BASE_URL = Platform.OS === 'android'
-  ? 'http://10.0.2.2:3333'
-  : 'http://localhost:3333';
+  ? process.env.EXPO_PUBLIC_API_URL_ANDROID
+  : process.env.EXPO_PUBLIC_API_URL_WEB;
 
 export const storage = {
   async getItem(key: string): Promise<string | null> {
