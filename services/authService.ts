@@ -27,7 +27,7 @@ type LoginResponse = {
 
 export const authService = {
   async register(payload: RegisterPayload): Promise<RegisterResponse> {
-    const { data } = await api.post<RegisterResponse>('/user/register', payload);
+    const { data } = await api.post<RegisterResponse>('/user', payload);
     return data;
   },
 

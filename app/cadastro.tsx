@@ -1,13 +1,13 @@
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/Input/Input';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import { authService } from '@/services/authService';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
-const TEMP_COMPANY_ID = '019d6059-53c9-7553-afa7-2cc9236d61e9'; // ID mockado para testes
+const TEMP_COMPANY_ID = '019d6787-42ea-7dd1-a8fe-c61c3732c082'; // ID mockado para testes
 
 export default function Cadastro() {
   const [name, setName] = useState('');
