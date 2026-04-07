@@ -57,9 +57,13 @@ export default function Triagem() {
       const data = response.data;
 
       if (data.isLeaf) {
+        console.log('Leaf node data:', data);
         router.push({ 
           pathname: '/(user)/triage-end',
-          params: { groupId: data.targetGroupId } 
+          params: { 
+            groupName: data.supportGroup.name,
+            subjectName: data.subject.name,
+          } 
         });
       } else {
         setNode(data);
