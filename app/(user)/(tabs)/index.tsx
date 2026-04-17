@@ -7,7 +7,7 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 
 export default function Index() {
   const handlePress = () => {
-    router.push('/triage');
+    router.push('/triage-intro');
   };
 
   return (
