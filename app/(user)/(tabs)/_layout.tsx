@@ -19,6 +19,12 @@ export default function RootLayout() {
                     title: 'History',
                 }}
             />
+            <Tabs.Screen
+                name="waiting"
+                options={{
+                    href: null,
+                }}
+            />
         </Tabs>
     );
 }

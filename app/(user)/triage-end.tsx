@@ -1,6 +1,7 @@
+import Button from '@/components/Button/Button';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, router } from 'expo-router';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 export default function TriageEnd() {
@@ -31,6 +32,12 @@ export default function TriageEnd() {
                 <Text style={styles.highlightText}> {subjectName} </Text>
         </Text>
 
+        <View style={styles.buttonContainer}>
+        <Button 
+            label="Continuar" 
+            onPress={() => router.push('/waiting')} 
+        />
+        </View>
     </View>
 
   );
@@ -68,5 +75,9 @@ const styles = StyleSheet.create({
     highlightText: {
         fontWeight: 700,
         color: Colors.teal.base,
+    },
+    buttonContainer: {
+        width: '100%',
+        marginTop: 10,
     },
 });
