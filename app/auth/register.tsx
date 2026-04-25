@@ -1,34 +1,52 @@
 import { router } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/Input/Input';
+import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import { authService } from '@/services/authService';
 
-export default function Login() {
+const TEMP_COMPANY_ID = '019d6787-42ea-7dd1-a8fe-c61c3732c082';
+
+export default function Register() {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [hasError, setHasError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('E-mail ou senha incorretos.\nTente novamente');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const handleLogin = async () => {
-    if (!email || !password) {
+  const passwordMismatch = confirmPassword.length > 0 && password !== confirmPassword;
+
+  const handleRegister = async () => {
+    if (!name || !email || !password || !confirmPassword) {
       setHasError(true);
       setErrorMessage('Preencha todos os campos.');
+      return;
+    }
+    if (passwordMismatch) {
+      setHasError(true);
+      setErrorMessage('As senhas não coincidem.');
       return;
     }
 
     try {
       setIsLoading(true);
       setHasError(false);
-      await authService.login({ email, password });
-      router.replace('/(user)/(tabs)');
+      await authService.register({
+        name,
+        email,
+        password,
+        companyId: TEMP_COMPANY_ID,
+        role: 'CLIENT',
+      });
+      router.push('/auth/login');
     } catch (error: any) {
       setHasError(true);
-      setErrorMessage(error.response?.data?.message || 'E-mail ou senha incorretos.\nTente novamente');
+      setErrorMessage(error.response?.data?.message || 'Não foi possível criar a conta.');
     } finally {
       setIsLoading(false);
     }
@@ -36,21 +54,23 @@ export default function Login() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../assets/logos/Orbi.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+      <OrbiAvatar size={150} />
 
-      <Text style={[globalStyles.title2, styles.title]}>Entrar</Text>
+      <Text style={[globalStyles.title2, styles.title]}>Cadastrar</Text>
 
+      <InputField
+        placeholder="Nome"
+        icon="person-outline"
+        value={name}
+        onChangeText={(text) => { setName(text); setHasError(false); }}
+        isError={hasError && !name}
+      />
       <InputField
         placeholder="E-mail"
         icon="mail-outline"
         value={email}
         onChangeText={(text) => { setEmail(text); setHasError(false); }}
+        isError={hasError && !email}
       />
       <InputField
         placeholder="Senha"
@@ -58,10 +78,16 @@ export default function Login() {
         value={password}
         onChangeText={(text) => { setPassword(text); setHasError(false); }}
         secureTextEntry
-        isError={hasError}
+        isError={hasError && (!password || passwordMismatch)}
       />
-
-      <Text style={[globalStyles.label2, styles.forgotPassword]}>Esqueci minha senha</Text>
+      <InputField
+        placeholder="Digite novamente sua senha"
+        icon="lock-closed-outline"
+        value={confirmPassword}
+        onChangeText={(text) => { setConfirmPassword(text); setHasError(false); }}
+        secureTextEntry
+        isError={hasError && (passwordMismatch || !confirmPassword)}
+      />
 
       {hasError && (
         <Text style={[globalStyles.label1, styles.errorText]}>
@@ -71,16 +97,16 @@ export default function Login() {
 
       <View style={styles.buttonContainer}>
         <Button
-          label={isLoading ? 'Entrando...' : 'Entrar'}
-          onPress={handleLogin}
+          label={isLoading ? 'Criando conta...' : 'Criar conta'}
+          onPress={handleRegister}
           disabled={isLoading}
         />
       </View>
 
       <Text style={[globalStyles.text2, styles.linkText]}>
-        Não tem uma conta?{' '}
-        <Text style={styles.link} onPress={() => router.push('/cadastro')}>
-          Cadastrar
+        Já tem uma conta?{' '}
+        <Text style={styles.link} onPress={() => router.push('/auth/login')}>
+          Entrar
         </Text>
       </Text>
 
@@ -109,13 +135,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 32,
   },
-  forgotPassword: {
-    color: Colors.teal.base,
-    textAlign: 'right',
-    marginTop: -8,
-    marginBottom: 18,
-    fontWeight: 'bold',
-  },
   errorText: {
     color: Colors.red.base,
     textAlign: 'center',
@@ -134,6 +153,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingVertical: 10,
     textDecorationLine: 'underline',
-    marginTop: 20,
+    marginTop: 15,
   },
 });

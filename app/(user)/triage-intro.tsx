@@ -1,46 +1,31 @@
-import Button from '@/components/Button/Button';
-import Colors from '@/constants/colors';
-import { globalStyles } from '@/constants/globalStyles';
 import { router } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Button from '@/components/Button/Button';
+import MessageBox from '@/components/MessageBox/MessageBox';
+import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
+import Colors from '@/constants/colors';
+import { globalStyles } from '@/constants/globalStyles';
 
 export default function TriageIntro() {
-  const handleProceed = () => {
-    router.push('/triage');
-  };
-
-  const handleCancel = () => {
-    router.back(); 
-  };
-
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('../../assets/logos/Orbi Sleep.png')}
-          style={styles.logo}
-          resizeMode="contain"
-        />
-      </View>
+      <OrbiAvatar variant="sleep" size={150} />
 
-      <View style={styles.messageBox}>
-        <Text style={[globalStyles.text2, styles.description]}>
-          Antes de te encaminhar para um de nossos atendentes, vamos fazer uma breve triagem para entender melhor como podemos te ajudar!
-        </Text>
-      </View>
+      <MessageBox text="Antes de te encaminhar para um de nossos atendentes, vamos fazer uma breve triagem para entender melhor como podemos te ajudar!" />
 
       <View style={styles.buttonContainer}>
-        <Button 
-          label="Clique para prosseguir" 
-          onPress={handleProceed} 
+        <Button
+          label="Clique para prosseguir"
+          onPress={() => router.push('/triage')}
         />
-        
-        <TouchableOpacity 
-          onPress={handleCancel} 
+        <TouchableOpacity
+          onPress={() => router.back()}
           style={styles.cancelButton}
         >
-          <Text style={styles.cancelButtonText}>Cancelar Chamado</Text>
+          <Text style={[globalStyles.text2, styles.cancelButtonText]}>
+            Cancelar Chamado
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -55,43 +40,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  logo: {
-    width: 150,
-    height: 150,
-  },
-  messageBox: {
-    backgroundColor: Colors.white[500], 
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 32,
-    width: '100%',
-    borderWidth: 1,
-    borderColor: Colors.teal.base, 
-  },
-  description: {
-    textAlign: 'center',
-    color: Colors.black.base,
-    lineHeight: 22,
-  },
   buttonContainer: {
     width: '100%',
-    gap: 12, 
+    gap: 12,
   },
   cancelButton: {
     width: '100%',
     padding: 16,
     borderRadius: 8,
-    backgroundColor: '#E06D2B', 
+    backgroundColor: Colors.orange.base,
     alignItems: 'center',
     marginTop: 8,
   },
   cancelButtonText: {
     color: Colors.white[300],
     fontWeight: 'bold',
-    fontSize: 16,
   },
 });

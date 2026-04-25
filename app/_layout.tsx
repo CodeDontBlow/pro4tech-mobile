@@ -2,18 +2,16 @@ import { Stack } from 'expo-router';
 import 'react-native-reanimated';
 
 export const unstable_settings = {
-    anchor: '(user)',
+  anchor: '(user)',
 };
 
 export default function RootLayout() {
-    return (
-        <Stack>
-          <Stack.Screen name="(user)" options={{ headerShown: false }} />
-          <Stack.Screen name="cadastro" options={{ headerShown: false }} />
-          <Stack.Screen name="login" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          <Stack.Screen name="triage" options={{ title: 'Triagem', headerShown: true }} />
-          <Stack.Screen name="triage-end" options={{ title: 'Triagem Concluída', headerShown: true }} />
-        </Stack>
-    );
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="auth" />
+      <Stack.Screen name="(user)" />
+      <Stack.Screen name="(agent)" />
+    </Stack>
+  );
 }

@@ -1,42 +1,27 @@
-import Button from '@/components/Button/Button';
-import Colors from '@/constants/colors';
-import { globalStyles } from '@/constants/globalStyles';
 import { router } from 'expo-router';
 import React from 'react';
-import { Image, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import MessageBox from '@/components/MessageBox/MessageBox';
+import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
+import Colors from '@/constants/colors';
+import { globalStyles } from '@/constants/globalStyles';
 
 export default function WaitingTicket() {
-  const handleCancel = () => {
-    router.replace('/(user)/(tabs)'); 
-  };
-
   return (
     <View style={styles.container}>
-      <View style={styles.logoContainer}>
-        <Image
-          source={require('@/assets/logos/Orbi Sleep.png')} 
-          style={styles.logo}
-          resizeMode="contain"
-        />
-        <ActivityIndicator 
-          size="large" 
-          color={Colors.teal.base} 
-          style={{ marginTop: 20 }} 
-        />
-      </View>
+      <OrbiAvatar variant="sleep" size={180} />
+      <ActivityIndicator size="large" color={Colors.teal.base} style={styles.loader} />
 
-      <View style={styles.messageBox}>
-        <Text style={[globalStyles.text2, styles.description]}>
-          Aguarde um instante.
-        </Text>
-      </View>
+      <MessageBox text="Aguarde um instante." />
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity 
-          onPress={handleCancel} 
+        <TouchableOpacity
+          onPress={() => router.replace('/(user)/(tabs)')}
           style={styles.cancelButton}
         >
-          <Text style={styles.cancelButtonText}>Cancelar Chamado</Text>
+          <Text style={[globalStyles.text2, styles.cancelButtonText]}>
+            Cancelar Chamado
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -51,29 +36,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  logoContainer: {
-    alignItems: 'center',
+  loader: {
+    marginTop: -8,
     marginBottom: 24,
-  },
-  logo: {
-    width: 180, 
-    height: 180,
-  },
-  messageBox: {
-    backgroundColor: Colors.white[500], 
-    padding: 20,
-    borderRadius: 16,
-    marginBottom: 32,
-    width: '100%',
-    borderWidth: 1,
-    borderColor: Colors.teal.base, 
-  },
-  description: {
-    textAlign: 'center',
-    color: Colors.black.base,
-    lineHeight: 24,
-    fontSize: 18,
-    fontWeight: '500',
   },
   buttonContainer: {
     width: '100%',
@@ -82,12 +47,11 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 16,
     borderRadius: 8,
-    backgroundColor: '#E06D2B', 
+    backgroundColor: Colors.orange.base,
     alignItems: 'center',
   },
   cancelButtonText: {
     color: Colors.white[300],
     fontWeight: 'bold',
-    fontSize: 16,
   },
 });
