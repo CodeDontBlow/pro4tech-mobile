@@ -9,6 +9,7 @@ export default function UserLayout() {
       <Stack.Screen name="triage-end" />
       <Stack.Screen name="waiting" />
       <Stack.Screen name="chat" />
+      <Stack.Screen name="profile" />
     </Stack>
   );
 }
