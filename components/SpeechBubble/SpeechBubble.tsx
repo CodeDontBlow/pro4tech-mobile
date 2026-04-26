@@ -11,12 +11,13 @@ type Option = {
 type Props = {
   type: 'bot' | 'user';
   text: string;
+  time?: string;
   options?: Option[];
   onLongPress?: () => void;
   onPress?: () => void;
 };
 
-export default function SpeechBubble({ type, text, options, onLongPress, onPress }: Props) {
+export default function SpeechBubble({ type, text, time, options, onLongPress, onPress }: Props) {
   const isUser = type === 'user';
 
   return (
@@ -36,6 +37,12 @@ export default function SpeechBubble({ type, text, options, onLongPress, onPress
                 </View>
               ))}
             </View>
+          )}
+
+          {time && (
+            <Text style={[styles.time, isUser ? styles.timeUser : styles.timeBot]}>
+              {time}
+            </Text>
           )}
 
           <View style={isUser ? styles.userTail : styles.botTail} />

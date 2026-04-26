@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Platform, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import ChatInput from '@/components/ChatInput/ChatInput';
 import DateSeparator from '@/components/DateSeparator/DateSeparator';
 import Header from '@/components/Header/Header';
@@ -12,15 +12,19 @@ type Message = {
   id: string;
   type: 'user' | 'bot';
   text: string;
+  time: string;
 };
 
 const MOCK_AGENT_NAME = 'Luana Moraes Souza';
 const MOCK_STATUS = 'Aberto';
 
+const getCurrentTime = () =>
+  new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
 export default function Chat() {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', type: 'bot', text: 'Bom dia, eu sou a Luana, como posso te ajudar?' },
-    { id: '2', type: 'user', text: 'Estou tentando cadastrar um produto no sistema mas aparece um erro' },
+    { id: '1', type: 'bot', text: 'Bom dia, eu sou a Luana, como posso te ajudar?', time: '09:00' },
+    { id: '2', type: 'user', text: 'Estou tentando cadastrar um produto no sistema mas aparece um erro', time: '09:01' },
   ]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
@@ -30,6 +34,7 @@ export default function Chat() {
       id: `msg-${Date.now()}`,
       type: 'user',
       text,
+      time: getCurrentTime(),
     };
     setMessages(prev => [...prev, newMessage]);
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
@@ -66,6 +71,7 @@ export default function Chat() {
             key={message.id}
             type={message.type}
             text={message.text}
+            time={message.time}
             onLongPress={() => setSelectedId(message.id)}
             onPress={() => setSelectedId(message.id)}
           />

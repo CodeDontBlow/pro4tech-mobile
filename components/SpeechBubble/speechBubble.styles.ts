@@ -82,4 +82,15 @@ export default StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
   },
+  time: {
+    fontSize: 10,
+    marginTop: 4,
+    alignSelf: 'flex-end',
+  },
+  timeUser: {
+    color: Colors.teal[300],
+  },
+  timeBot: {
+    color: Colors.black[300],
+  },
 });
