@@ -1,83 +1,64 @@
+import { router, useLocalSearchParams } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
 import Button from '@/components/Button/Button';
+import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
-import { useLocalSearchParams, router } from 'expo-router';
-import { Image, StyleSheet, Text, View } from 'react-native';
 
 export default function TriageEnd() {
   const { groupName, subjectName } = useLocalSearchParams<{
-    groupName: string,
-    subjectName: any,
+    groupName: string;
+    subjectName: string;
   }>();
-
-
 
   return (
     <View style={styles.container}>
-        <View style={styles.logoContainer}>
-            <Image
-                source={require('../../assets/logos/Orbi.png')}
-                style={styles.logo}
-                resizeMode="contain"
-            />
-        </View>
-        
-        <Text style={styles.mainText}>
-            Aguarde um instante, vamos direcionar você ao atendente! 
-        </Text>
-        <Text style={styles.subText}>
-            Seu chamado será encaminhado para um atendente do grupo 
-                <Text style={styles.highlightText}> {groupName} </Text>, 
-            tratando do assunto: 
-                <Text style={styles.highlightText}> {subjectName} </Text>
-        </Text>
+      <OrbiAvatar variant="default" size={120} />
 
-        <View style={styles.buttonContainer}>
-        <Button 
-            label="Continuar" 
-            onPress={() => router.push('/waiting')} 
+      <Text style={[globalStyles.text1, styles.mainText]}>
+        Aguarde um instante, vamos direcionar você ao atendente!
+      </Text>
+
+      <Text style={[globalStyles.label1, styles.subText]}>
+        Seu chamado será encaminhado para um atendente do grupo{' '}
+        <Text style={styles.highlightText}>{groupName}</Text>, tratando do
+        assunto: <Text style={styles.highlightText}>{subjectName}</Text>
+      </Text>
+
+      <View style={styles.buttonContainer}>
+        <Button
+          label="Continuar"
+          onPress={() => router.push('/waiting')}
         />
-        </View>
+      </View>
     </View>
-
   );
 }
-        
+
 const styles = StyleSheet.create({
-    container: {
-        maxWidth: 500,
-        marginHorizontal: 'auto',
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: 16,
-    },
-    logoContainer: {
-        alignItems: 'center',
-        marginBottom: 20,
-    },
-    logo: {
-        width: 120,
-        height: 120,
-    },
-    mainText: {
-        color: Colors.teal[700],
-        ...globalStyles.text1,
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    subText: {
-        color: Colors.black.base,
-        ...globalStyles.label1,
-        marginBottom: 20,
-        textAlign: 'center',
-    },
-    highlightText: {
-        fontWeight: 700,
-        color: Colors.teal.base,
-    },
-    buttonContainer: {
-        width: '100%',
-        marginTop: 10,
-    },
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 32,
+    backgroundColor: Colors.white[300],
+  },
+  mainText: {
+    color: Colors.teal[700],
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  subText: {
+    color: Colors.black.base,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  highlightText: {
+    fontWeight: '700',
+    color: Colors.teal.base,
+  },
+  buttonContainer: {
+    width: '100%',
+    marginTop: 10,
+  },
 });
