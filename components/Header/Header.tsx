@@ -1,8 +1,8 @@
+import { globalStyles } from '@/constants/globalStyles';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { globalStyles } from '@/constants/globalStyles';
 import styles from './header.styles';
 
 type Props = {
@@ -27,7 +27,7 @@ export default function Header({ title = 'ORBITA', showBack = false, showProfile
       <View style={styles.right}>
         {showProfile && (
           <TouchableOpacity onPress={() => router.push('/profile')} style={styles.iconButton}>
-            <Ionicons name="person-circle-outline" size={32} color={styles.icon.color} />
+            <Ionicons name="person-circle-sharp" size={40} color={styles.icon.color} />
           </TouchableOpacity>
         )}
       </View>

@@ -1,14 +1,14 @@
-import { StyleSheet } from 'react-native';
 import Colors from '@/constants/colors';
+import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.white.base,
+    backgroundColor: Colors.white[700],
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 12,
   },
   left: {
     width: 40,

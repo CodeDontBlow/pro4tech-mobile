@@ -1,9 +1,10 @@
-import { StyleSheet, Text, View } from "react-native";
+import { HeaderTitle } from "@react-navigation/elements";
+import { StyleSheet, View } from "react-native";
 
 export default function Index() {
   return (
     <View style={styles.container}>
-      <Text>Histórico</Text>
+      <HeaderTitle>Histórico de Chamados</HeaderTitle>
     </View>
   );
 }
