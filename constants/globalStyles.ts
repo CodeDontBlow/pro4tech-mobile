@@ -19,6 +19,12 @@ export const globalStyles = StyleSheet.create({
         lineHeight: 32,
     },
 
+    subtitle2: {
+        fontFamily: fonts.martel.regular,
+        fontSize: 20,
+        lineHeight: 28,
+    },
+
     text1: {
         fontFamily: fonts.ibmPlex.regular,
         fontSize: 18,
