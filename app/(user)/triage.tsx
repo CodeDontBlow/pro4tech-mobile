@@ -60,7 +60,10 @@ export default function Triage() {
           params: {
             groupName: data.supportGroup.name,
             subjectName: data.subject.name,
-          },
+            groupId: data.supportGroup.id,  
+            subjectId: data.subject.id,
+            triageNodeId: data.id
+          } 
         });
       } else {
         setNode(data);

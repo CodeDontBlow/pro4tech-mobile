@@ -4,12 +4,28 @@ import Button from '@/components/Button/Button';
 import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import api from '@/services/api';
 
 export default function TriageEnd() {
-  const { groupName, subjectName } = useLocalSearchParams<{
-    groupName: string;
-    subjectName: string;
+  const { groupName, subjectName, triageNodeId } = useLocalSearchParams<{
+    groupName: string,
+    subjectName: string,
+    groupId: string,  
+    subjectId: string,
+    triageNodeId: string,
   }>();
+
+const handleFinalize = async () => {
+  try {
+    await api.post('/tickets', {
+        triageLeafId: triageNodeId, 
+    });
+
+    router.push('/waiting');
+  } catch (error: any) {
+    console.error("Erro:", error);
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -28,7 +44,7 @@ export default function TriageEnd() {
       <View style={styles.buttonContainer}>
         <Button
           label="Continuar"
-          onPress={() => router.push('/waiting')}
+          onPress={handleFinalize}
         />
       </View>
     </View>
