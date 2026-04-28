@@ -5,11 +5,15 @@ import { globalStyles } from '@/constants/globalStyles';
 export default StyleSheet.create({
   button: {
     backgroundColor: Colors.teal.base,
-    borderRadius: 8,
+    borderRadius: 50,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
     marginBottom: 16,
+    width: '100%',
+  },
+  buttonLight: {
+    backgroundColor: Colors.white[300],
   },
   buttonDisabled: {
     backgroundColor: Colors.teal[300],
@@ -17,6 +21,10 @@ export default StyleSheet.create({
   },
   buttonText: {
     color: Colors.white[300],
-    ...globalStyles.subtitle,
+    ...globalStyles.subtitle2,
+  },
+  buttonTextLight: {
+    color: Colors.teal.base,
+    fontWeight: 'bold',
   },
 });

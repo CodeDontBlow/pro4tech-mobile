@@ -8,7 +8,7 @@ import 'react-native-reanimated';
 SplashScreen.preventAutoHideAsync();
 
 export const unstable_settings = {
-  anchor: '(user)',
+  anchor: 'index',
 };
 
 export default function RootLayout() {

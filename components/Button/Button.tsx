@@ -1,24 +1,34 @@
 import React from 'react';
-import { StyleProp, Text, TextStyle, TouchableOpacity, ViewStyle } from 'react-native';
+import { Text, TouchableOpacity } from 'react-native';
 import styles from './button.styles';
+
+type Variant = 'primary' | 'light';
 
 type Props = {
   label: string;
   onPress: () => void;
   disabled?: boolean;
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
+  variant?: Variant;
+  style?: object;
+  textStyle?: object;
 };
 
-export default function Button({ label, onPress, disabled = false, style, textStyle }: Props) {
+export default function Button({ label, onPress, disabled = false, variant = 'primary', style, textStyle }: Props) {
   return (
     <TouchableOpacity
-      style={[styles.button, disabled && styles.buttonDisabled, style]}
+      style={[
+        styles.button,
+        variant === 'light' && styles.buttonLight,
+        disabled && styles.buttonDisabled,
+        style,
+      ]}
       onPress={onPress}
       disabled={disabled}
       activeOpacity={0.8}
     >
-      <Text style={[styles.buttonText, textStyle]}>{label}</Text>
+      <Text style={[styles.buttonText, variant === 'light' && styles.buttonTextLight, textStyle]}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
