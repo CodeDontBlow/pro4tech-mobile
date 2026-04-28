@@ -22,11 +22,10 @@ export default function Index() {
 
       <View style={styles.textContainer}>
         <Text style={[globalStyles.title2, styles.title]}>
-          Olá!
-        </Text>
-        <Text style={[globalStyles.title2, styles.subtitle]}>
+          Olá, {''}! {'\n'}
           Tudo em órbita?
         </Text>
+
         <Text style={[globalStyles.text2, styles.description]}>
           Você não tem nenhum chamado em aberto no momento.
         </Text>
