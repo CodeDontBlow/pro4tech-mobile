@@ -1,5 +1,7 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
+import { io, Socket } from 'socket.io-client';
 import ChatInput from '@/components/ChatInput/ChatInput';
 import DateSeparator from '@/components/DateSeparator/DateSeparator';
 import Header from '@/components/Header/Header';
@@ -7,41 +9,140 @@ import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
 import Alert from '@/components/Alert/Alert';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import api from '@/services/api';
+import { authService } from '@/services/authService';
 
-type Message = {
+type ChatMessage = {
   id: string;
-  type: 'user' | 'bot';
-  text: string;
-  time: string;
+  ticketId: string;
+  senderId: string;
+  senderRole: 'CLIENT' | 'AGENT' | 'ADMIN';
+  content: string;
+  createdAt: string;
+  editedAt?: string | null;
+  deletedAt?: string | null;
 };
 
-const MOCK_AGENT_NAME = 'Luana Moraes Souza';
-const MOCK_STATUS = 'Aberto';
-
-const getCurrentTime = () =>
-  new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+const formatTime = (value?: string) => {
+  if (!value) return undefined;
+  return new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+};
 
 export default function Chat() {
-  const [messages, setMessages] = useState<Message[]>([
-    { id: '1', type: 'bot', text: 'Bom dia, eu sou a Luana, como posso te ajudar?', time: '09:00' },
-    { id: '2', type: 'user', text: 'Estou tentando cadastrar um produto no sistema mas aparece um erro', time: '09:01' },
-  ]);
+  const params = useLocalSearchParams<{ ticketId?: string | string[] }>();
+  const ticketId = Array.isArray(params.ticketId) ? params.ticketId[0] : params.ticketId;
+
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [ticketStatus, setTicketStatus] = useState<string>('Aguardando');
+  const [agentLabel, setAgentLabel] = useState<string>('Atendente');
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [authToken, setAuthToken] = useState<string | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
+  const socketRef = useRef<Socket | null>(null);
+
+  useEffect(() => {
+    authService.getToken().then(setAuthToken);
+  }, []);
+
+  useEffect(() => {
+    if (!ticketId) return;
+
+    const fetchTicket = async () => {
+      try {
+        const response = await api.get(`/tickets/${ticketId}`);
+        const ticket = response.data;
+        if (ticket?.status) {
+          setTicketStatus(ticket.status);
+        }
+        if (ticket?.agentId) {
+          setAgentLabel('Atendente conectado');
+        }
+      } catch (err) {
+        console.error('Erro ao carregar ticket', err);
+      }
+    };
+
+    fetchTicket();
+  }, [ticketId]);
+
+  useEffect(() => {
+    if (!ticketId || !authToken) {
+      return;
+    }
+
+    const baseUrl = api.defaults.baseURL;
+    if (!baseUrl) {
+      console.error('API base URL nao configurada para socket');
+      return;
+    }
+
+    const socket = io(`${baseUrl}/chat`, {
+      auth: { token: authToken },
+    });
+
+    socketRef.current = socket;
+
+    socket.on('connect', () => {
+      socket.emit('joinRoom', { ticketId });
+    });
+
+    socket.on('chatHistory', (history: ChatMessage[]) => {
+      setMessages(history);
+    });
+
+    socket.on('newMessage', (message: ChatMessage) => {
+      setMessages(prev => [...prev, message]);
+    });
+
+    socket.on('updatedMessage', (message: ChatMessage) => {
+      setMessages(prev => prev.map(item => (item.id === message.id ? message : item)));
+    });
+
+    socket.on('deletedMessage', (message: ChatMessage) => {
+      setMessages(prev => prev.map(item => (item.id === message.id ? message : item)));
+    });
+
+    socket.on('socketError', (payload: { message?: string }) => {
+      console.error(payload?.message ?? 'Erro no socket');
+    });
+
+    return () => {
+      socket.disconnect();
+      socketRef.current = null;
+    };
+  }, [ticketId, authToken]);
+
+  useEffect(() => {
+    if (messages.length === 0) return;
+    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+  }, [messages]);
+
+  const orderedMessages = useMemo(() => {
+    return [...messages].sort(
+      (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    );
+  }, [messages]);
 
   const handleSend = (text: string) => {
-    const newMessage: Message = {
-      id: `msg-${Date.now()}`,
-      type: 'user',
-      text,
-      time: getCurrentTime(),
-    };
-    setMessages(prev => [...prev, newMessage]);
-    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+    if (!ticketId) return;
+    if (!text.trim()) return;
+
+    socketRef.current?.emit('sendMessage', {
+      ticketId,
+      content: text.trim(),
+    });
   };
 
   const handleDelete = () => {
-    setMessages(prev => prev.filter(m => m.id !== selectedId));
+    if (!ticketId || !selectedId) {
+      setSelectedId(null);
+      return;
+    }
+
+    socketRef.current?.emit('deleteMessage', {
+      ticketId,
+      messageId: selectedId,
+    });
     setSelectedId(null);
   };
 
@@ -50,9 +151,9 @@ export default function Chat() {
       <Header title="ORBITA" showBack showProfile />
 
       <View style={styles.ticketInfo}>
-        <Text style={[globalStyles.text2, styles.agentName]}>{MOCK_AGENT_NAME}</Text>
+        <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
         <View style={styles.statusBadge}>
-          <Text style={[globalStyles.label1, styles.statusText]}>{MOCK_STATUS}</Text>
+          <Text style={[globalStyles.label1, styles.statusText]}>{ticketStatus}</Text>
         </View>
       </View>
 
@@ -66,14 +167,22 @@ export default function Chat() {
       >
         <DateSeparator label={new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })} />
 
-        {messages.map(message => (
+        {orderedMessages.map(message => (
           <SpeechBubble
             key={message.id}
-            type={message.type}
-            text={message.text}
-            time={message.time}
-            onLongPress={() => setSelectedId(message.id)}
-            onPress={() => setSelectedId(message.id)}
+            type={message.senderRole === 'CLIENT' ? 'user' : 'bot'}
+            text={message.deletedAt ? 'Mensagem removida' : message.content}
+            time={formatTime(message.createdAt)}
+            onLongPress={
+              message.senderRole === 'CLIENT'
+                ? () => setSelectedId(message.id)
+                : undefined
+            }
+            onPress={
+              message.senderRole === 'CLIENT'
+                ? () => setSelectedId(message.id)
+                : undefined
+            }
           />
         ))}
       </ScrollView>
