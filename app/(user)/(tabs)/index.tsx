@@ -1,14 +1,33 @@
 import Button from '@/components/Button/Button';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import { authService } from '@/services/authService';
 import { router } from 'expo-router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 export default function Index() {
+  const [name, setName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const handlePress = () => {
     router.push('/triage-intro');
   };
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const user = await authService.getName();
+        if (mounted) setName(user.name);
+      } catch (err) {
+        console.error('Erro ao buscar perfil', err);
+      } finally {
+        if (mounted) setLoading(false);   
+      }
+
+    })();
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -22,7 +41,7 @@ export default function Index() {
 
       <View style={styles.textContainer}>
         <Text style={[globalStyles.title2, styles.title]}>
-          Olá, {''}! {'\n'}
+          Olá, {name || 'usuário'}! {'\n'}
           Tudo em órbita?
         </Text>
 
