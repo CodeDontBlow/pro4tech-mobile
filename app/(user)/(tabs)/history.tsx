@@ -1,26 +1,8 @@
-// import { HeaderTitle } from "@react-navigation/elements";
-// import { StyleSheet, View } from "react-native";
-
-// export default function Index() {
-//   return (
-//     <View style={styles.container}>
-//       <HeaderTitle>Histórico de Chamados</HeaderTitle>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-// });
-
-
 import TicketCard from '@/components/TicketCard/ticketcard';
+import Colors from '@/constants/colors';
+import { globalStyles } from '@/constants/globalStyles';
 import React, { useState } from 'react';
-import { FlatList, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 
 type Ticket = {
   id: string;
@@ -49,6 +31,24 @@ const MOCK_TICKETS: Ticket[] = [
     lastMessage: 'Preciso de mais informações...',
     status: 'ABERTO',
   },
+    {
+    id: '4',
+    agent: { name: 'Ana Costa', avatar: 'https://randomuser.me/api/portraits/women/3.jpg' },
+    lastMessage: 'Preciso de mais informações...',
+    status: 'ABERTO',
+  },
+    {
+    id: '5',
+    agent: { name: 'Ana Costa', avatar: 'https://randomuser.me/api/portraits/women/3.jpg' },
+    lastMessage: 'Preciso de mais informações...',
+    status: 'ABERTO',
+  },
+    {
+    id: '6',
+    agent: { name: 'Ana Costa', avatar: 'https://randomuser.me/api/portraits/women/3.jpg' },
+    lastMessage: 'Preciso de mais informações...',
+    status: 'ABERTO',
+  },
 ];
 
 export default function History() {
@@ -56,6 +56,11 @@ export default function History() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.titleContainer}>
+        <Text style={[globalStyles.title2, styles.title]}>
+          Histórico de Chamados
+        </Text>        
+      </View>
       <FlatList
         data={tickets}
         keyExtractor={(item) => item.id}
@@ -70,4 +75,13 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  titleContainer: {
+    padding: 16,
+    justifyContent: 'center', 
+    alignItems: 'center',
+  },
+  title: {
+    color: Colors.teal.[700],
+    fontSize: 24,   
+  }
 });
