@@ -1,14 +1,14 @@
-import { StyleSheet } from 'react-native';
 import Colors from '@/constants/colors';
+import { StyleSheet } from 'react-native';
 
 export default StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: Colors.white.base,
+    backgroundColor: Colors.white[700],
     paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingVertical: 4,
   },
   left: {
     width: 40,
@@ -21,6 +21,7 @@ export default StyleSheet.create({
   title: {
     color: Colors.teal[500],
     flex: 1,
+    fontSize: 30,
     textAlign: 'center',
   },
   iconButton: {

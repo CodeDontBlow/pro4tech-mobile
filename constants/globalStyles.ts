@@ -8,14 +8,17 @@ export const globalStyles = StyleSheet.create({
         lineHeight: 50,
     },
     title2: {
-        fontFamily: fonts.martel.bold,
+        fontFamily: fonts.martelSans.bold,
         fontSize: 36,
-        lineHeight: 42,
+        lineHeight: 43.5,
+        includeFontPadding: false,
+        textAlignVertical: 'center',
+        paddingTop: 10,
     },
 
     subtitle: {
-        fontFamily: fonts.martel.regular,
-        fontSize: 22,
+        fontFamily: fonts.martelSans.regular,
+        fontSize: 30,
         lineHeight: 32,
     },
 

@@ -9,6 +9,16 @@ import {
 } from '@expo-google-fonts/martel';
 
 import {
+    MartelSans_200ExtraLight,
+    MartelSans_300Light,
+    MartelSans_400Regular,
+    MartelSans_600SemiBold,
+    MartelSans_700Bold,
+    MartelSans_800ExtraBold,
+    MartelSans_900Black,
+} from '@expo-google-fonts/martel-sans';
+
+import {
     IBMPlexSans_100Thin,
     IBMPlexSans_200ExtraLight,
     IBMPlexSans_300Light,
@@ -28,6 +38,17 @@ export const fonts = {
         extraBold:  'Martel_800ExtraBold',
         black:      'Martel_900Black',
     },
+
+    martelSans: {
+        extraLight: 'MartelSans_200ExtraLight',
+        light:      'MartelSans_300Light',
+        regular:    'MartelSans_400Regular',
+        semiBold:   'MartelSans_600SemiBold',
+        bold:       'MartelSans_700Bold',
+        extraBold:  'MartelSans_800ExtraBold',
+        black:      'MartelSans_900Black',
+    },
+
     ibmPlex: {
         thin:       'IBMPlexSans_100Thin',
         extraLight: 'IBMPlexSans_200ExtraLight',
@@ -54,4 +75,11 @@ export const fontAssets = {
     IBMPlexSans_500Medium,
     IBMPlexSans_600SemiBold,
     IBMPlexSans_700Bold,
+    MartelSans_200ExtraLight,
+    MartelSans_300Light,
+    MartelSans_400Regular,
+    MartelSans_600SemiBold,
+    MartelSans_700Bold,
+    MartelSans_800ExtraBold,
+    MartelSans_900Black,
 };

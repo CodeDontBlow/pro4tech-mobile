@@ -25,6 +25,15 @@ type LoginResponse = {
   access_token: string;
 };
 
+
+type User = { id : string; name: string; email: string;}; 
+  
+async function getName(): Promise<User> {
+  const { data } = await api.get<User>('/user/me');
+  return data;    
+}
+
+
 export const authService = {
   async register(payload: RegisterPayload): Promise<RegisterResponse> {
     const { data } = await api.post<RegisterResponse>('/user', payload);
@@ -43,4 +52,8 @@ export const authService = {
   async getToken(): Promise<string | null> {
     return storage.getItem('orbita_token');
   },
+
+  getName,
+ 
+
 };
