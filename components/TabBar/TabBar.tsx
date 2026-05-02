@@ -26,12 +26,15 @@ export default function TabBar({ state, navigation }: BottomTabBarProps) {
         };
 
         return (
+          
           <TouchableOpacity
+          
             key={tab.name}
             onPress={onPress}
             style={styles.tab}
             activeOpacity={0.7}
           >
+            
             <Ionicons
               name={isFocused ? tab.icon : `${tab.icon}-outline`}
               size={35  }

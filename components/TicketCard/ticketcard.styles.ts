@@ -1,12 +1,12 @@
+import Colors from '@/constants/colors';
 import { StyleSheet } from 'react-native';
-
 
 export default StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.white[700],
     borderRadius: 8,
     padding: 12,
-    marginHorizontal: 16,
+    marginHorizontal: 8,
     marginVertical: 8,
     elevation: 2,
   },
@@ -22,7 +22,7 @@ export default StyleSheet.create({
     marginRight: 10,
   },
   name: {
-    fontSize: 14,
+    color: Colors.teal[500],
     fontWeight: '600',
   },
   bottom: {
