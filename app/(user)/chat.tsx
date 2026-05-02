@@ -23,6 +23,11 @@ type ChatMessage = {
   deletedAt?: string | null;
 };
 
+interface TriageItem {
+  question: string;
+  answer: string;
+}
+
 const formatTime = (value?: string) => {
   if (!value) return undefined;
   return new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
@@ -146,6 +151,20 @@ export default function Chat() {
     setSelectedId(null);
   };
 
+  const [triageHistory, setTriageHistory] = useState<TriageItem[]>([]);
+
+  useEffect(() => {
+    const fetchTriage = async () => {
+      try {
+        const res = await api.get(`/tickets/${ticketId}/triage-history`);
+        setTriageHistory(res.data);
+      } catch (err) {
+        console.error("Erro ao carregar triagem", err);
+      }
+    };
+    fetchTriage();
+  }, [ticketId]);
+
   return (
     <View style={styles.container}>
       <Header title="ORBITA" showBack showProfile />
@@ -167,6 +186,21 @@ export default function Chat() {
       >
         <DateSeparator label={new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })} />
 
+
+        {triageHistory.map((item, index) => (
+            <View key={`triage-${index}`}>
+              <SpeechBubble 
+                type="bot" 
+                text={item.question} 
+                time={undefined}
+              />
+              <SpeechBubble 
+                type="user" 
+                text={item.answer} 
+                time={undefined}
+              />
+            </View>
+          ))}
         {orderedMessages.map(message => (
           <SpeechBubble
             key={message.id}
