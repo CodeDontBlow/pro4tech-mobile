@@ -17,11 +17,17 @@ export default function TriageEnd() {
 
 const handleFinalize = async () => {
   try {
-    await api.post('/tickets', {
-        triageLeafId: triageNodeId, 
+    const response = await api.post('/tickets', {
+        triageLeafId: triageNodeId,
     });
 
-    router.push('/waiting');
+    const ticketId = response.data?.id;
+    if (ticketId) {
+      router.push({
+        pathname: '/waiting',
+        params: { ticketId },
+      });
+    }
   } catch (error: any) {
     console.error("Erro:", error);
   }

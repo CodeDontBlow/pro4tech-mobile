@@ -1,12 +1,49 @@
-import { router } from 'expo-router';
-import React from 'react';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import MessageBox from '@/components/MessageBox/MessageBox';
 import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import api from '@/services/api';
+
+const POLL_INTERVAL_MS = 5000;
 
 export default function WaitingTicket() {
+  const { ticketId } = useLocalSearchParams<{ ticketId?: string }>();
+
+  useEffect(() => {
+    if (!ticketId) {
+      return;
+    }
+
+    let isActive = true;
+
+    const checkAssignment = async () => {
+      try {
+        const response = await api.get(`/tickets/${ticketId}`);
+        const ticket = response.data;
+
+        if (isActive && ticket?.agentId) {
+          router.replace({
+            pathname: '/chat',
+            params: { ticketId },
+          });
+        }
+      } catch (err) {
+        console.error('Erro ao verificar atribuicao do ticket', err);
+      }
+    };
+
+    checkAssignment();
+    const intervalId = setInterval(checkAssignment, POLL_INTERVAL_MS);
+
+    return () => {
+      isActive = false;
+      clearInterval(intervalId);
+    };
+  }, [ticketId]);
+
   return (
     <View style={styles.container}>
       <OrbiAvatar variant="sleep" size={180} />
