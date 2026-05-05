@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import { router } from 'expo-router';
 import { io, Socket } from 'socket.io-client';
 import ChatInput from '@/components/ChatInput/ChatInput';
 import DateSeparator from '@/components/DateSeparator/DateSeparator';
@@ -40,46 +41,57 @@ export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [ticketStatus, setTicketStatus] = useState<string>('Aguardando');
   const [agentLabel, setAgentLabel] = useState<string>('Atendente');
+  const [isClosed, setIsClosed] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
+  const [triageHistory, setTriageHistory] = useState<TriageItem[]>([]);
   const scrollViewRef = useRef<ScrollView>(null);
   const socketRef = useRef<Socket | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     authService.getToken().then(setAuthToken);
   }, []);
 
+  const fetchTicket = async () => {
+    if (!ticketId) return;
+    try {
+      const response = await api.get(`/tickets/${ticketId}`);
+      const ticket = response.data;
+      if (ticket?.status) {
+        setTicketStatus(ticket.status);
+        if (ticket.status === 'CLOSED') {
+          setIsClosed(true);
+          stopPolling();
+        }
+      }
+      if (ticket?.agentId) {
+        setAgentLabel('Atendente conectado');
+      }
+    } catch (err) {
+      console.error('Erro ao carregar ticket', err);
+    }
+  };
+
+  const stopPolling = () => {
+    if (pollingRef.current) {
+      clearInterval(pollingRef.current);
+      pollingRef.current = null;
+    }
+  };
+
   useEffect(() => {
     if (!ticketId) return;
-
-    const fetchTicket = async () => {
-      try {
-        const response = await api.get(`/tickets/${ticketId}`);
-        const ticket = response.data;
-        if (ticket?.status) {
-          setTicketStatus(ticket.status);
-        }
-        if (ticket?.agentId) {
-          setAgentLabel('Atendente conectado');
-        }
-      } catch (err) {
-        console.error('Erro ao carregar ticket', err);
-      }
-    };
-
     fetchTicket();
+    pollingRef.current = setInterval(fetchTicket, 5000);
+    return () => stopPolling();
   }, [ticketId]);
 
   useEffect(() => {
-    if (!ticketId || !authToken) {
-      return;
-    }
+    if (!ticketId || !authToken) return;
 
     const baseUrl = api.defaults.baseURL;
-    if (!baseUrl) {
-      console.error('API base URL nao configurada para socket');
-      return;
-    }
+    if (!baseUrl) return;
 
     const socket = io(`${baseUrl}/chat`, {
       auth: { token: authToken },
@@ -118,6 +130,19 @@ export default function Chat() {
   }, [ticketId, authToken]);
 
   useEffect(() => {
+    const fetchTriage = async () => {
+      if (!ticketId) return;
+      try {
+        const res = await api.get(`/tickets/${ticketId}/triage-history`);
+        setTriageHistory(res.data);
+      } catch (err) {
+        console.error('Erro ao carregar triagem', err);
+      }
+    };
+    fetchTriage();
+  }, [ticketId]);
+
+  useEffect(() => {
     if (messages.length === 0) return;
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
   }, [messages]);
@@ -129,9 +154,7 @@ export default function Chat() {
   }, [messages]);
 
   const handleSend = (text: string) => {
-    if (!ticketId) return;
-    if (!text.trim()) return;
-
+    if (!ticketId || !text.trim() || isClosed) return;
     socketRef.current?.emit('sendMessage', {
       ticketId,
       content: text.trim(),
@@ -143,7 +166,6 @@ export default function Chat() {
       setSelectedId(null);
       return;
     }
-
     socketRef.current?.emit('deleteMessage', {
       ticketId,
       messageId: selectedId,
@@ -151,27 +173,13 @@ export default function Chat() {
     setSelectedId(null);
   };
 
-  const [triageHistory, setTriageHistory] = useState<TriageItem[]>([]);
-
-  useEffect(() => {
-    const fetchTriage = async () => {
-      try {
-        const res = await api.get(`/tickets/${ticketId}/triage-history`);
-        setTriageHistory(res.data);
-      } catch (err) {
-        console.error("Erro ao carregar triagem", err);
-      }
-    };
-    fetchTriage();
-  }, [ticketId]);
-
   return (
     <View style={styles.container}>
-      <Header title="ORBITA" showBack showProfile />
+      <Header title="ORBITA" showBack showProfile onBack={() => router.replace('/(user)/(tabs)')} />
 
       <View style={styles.ticketInfo}>
         <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
-        <View style={styles.statusBadge}>
+        <View style={[styles.statusBadge, isClosed && styles.statusBadgeClosed]}>
           <Text style={[globalStyles.label1, styles.statusText]}>{ticketStatus}</Text>
         </View>
       </View>
@@ -186,42 +194,34 @@ export default function Chat() {
       >
         <DateSeparator label={new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })} />
 
-
         {triageHistory.map((item, index) => (
-            <View key={`triage-${index}`}>
-              <SpeechBubble 
-                type="bot" 
-                text={item.question} 
-                time={undefined}
-              />
-              <SpeechBubble 
-                type="user" 
-                text={item.answer} 
-                time={undefined}
-              />
-            </View>
-          ))}
+          <View key={`triage-${index}`}>
+            <SpeechBubble type="bot" text={item.question} time={undefined} />
+            <SpeechBubble type="user" text={item.answer} time={undefined} />
+          </View>
+        ))}
+
         {orderedMessages.map(message => (
           <SpeechBubble
             key={message.id}
             type={message.senderRole === 'CLIENT' ? 'user' : 'bot'}
             text={message.deletedAt ? 'Mensagem removida' : message.content}
             time={formatTime(message.createdAt)}
-            onLongPress={
-              message.senderRole === 'CLIENT'
-                ? () => setSelectedId(message.id)
-                : undefined
-            }
-            onPress={
-              message.senderRole === 'CLIENT'
-                ? () => setSelectedId(message.id)
-                : undefined
-            }
+            onLongPress={message.senderRole === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
+            onPress={message.senderRole === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
           />
         ))}
+
+        {isClosed && (
+          <View style={styles.closedContainer}>
+            <Text style={[globalStyles.label1, styles.closedText]}>
+              Este chamado foi encerrado pelo atendente.
+            </Text>
+          </View>
+        )}
       </ScrollView>
 
-      <ChatInput onSend={handleSend} />
+      {!isClosed && <ChatInput onSend={handleSend} />}
 
       <Alert
         visible={selectedId !== null}
@@ -258,6 +258,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 4,
   },
+  statusBadgeClosed: {
+    backgroundColor: Colors.red.base,
+  },
   statusText: {
     color: Colors.white[300],
   },
@@ -271,5 +274,17 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     paddingVertical: 16,
+  },
+  closedContainer: {
+    alignSelf: 'center',
+    backgroundColor: Colors.white[500],
+    borderRadius: 50,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginVertical: 12,
+  },
+  closedText: {
+    color: Colors.black[300],
+    textAlign: 'center',
   },
 });
