@@ -16,6 +16,7 @@ import Alert from '@/components/Alert/Alert';
 import Header from '@/components/Header/Header';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+<<<<<<< HEAD
 import api, { storage } from '@/services/api';
 import { authService } from '@/services/authService';
 
@@ -89,11 +90,26 @@ export default function Profile() {
     } finally {
       setShowLogoutAlert(false);
       router.replace('/auth/login');
+=======
+import Button from '@/components/Button/Button';
+import { authService } from '@/services/authService';
+import { router } from 'expo-router';
+
+export default function Profile() {
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      
+      router.replace('/auth/login'); 
+    } catch (error) {
+      console.error("Erro ao encerrar sessão:", error);
+>>>>>>> a6c6c76 (feat: implementa encerramento de sessão PT-144)
     }
   };
 
   return (
     <View style={styles.container}>
+<<<<<<< HEAD
       <Header
         title="ORBITA"
         showBack
@@ -176,10 +192,21 @@ export default function Profile() {
         onConfirm={handleLogout}
         onCancel={() => setShowLogoutAlert(false)}
       />
+=======
+      <Header title="Perfil" showBack showProfile={false} />
+      
+      <View style={styles.content}>
+        <View style={styles.buttonWrapper}>
+          <Button 
+            label="Encerrar Sessão" 
+            onPress={handleLogout} 
+          />
+        </View>
+      </View>
+>>>>>>> a6c6c76 (feat: implementa encerramento de sessão PT-144)
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -209,6 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.teal.base,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 32,
   },
   avatarEditBadge: {
     position: 'absolute',
@@ -283,6 +311,7 @@ const styles = StyleSheet.create({
   settingLabel: {
     color: Colors.black.base,
   },
+<<<<<<< HEAD
   logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -298,5 +327,9 @@ const styles = StyleSheet.create({
   logoutText: {
     color: Colors.red.base,
     fontWeight: '700',
+=======
+  buttonWrapper: {
+    width: '100%', 
+>>>>>>> a6c6c76 (feat: implementa encerramento de sessão PT-144)
   },
 });
