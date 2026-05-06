@@ -9,14 +9,15 @@ type Props = {
   title?: string;
   showBack?: boolean;
   showProfile?: boolean;
+  onBack?: () => void;
 };
 
-export default function Header({ title = 'ORBITA', showBack = false, showProfile = true }: Props) {
+export default function Header({ title = 'ORBITA', showBack = false, showProfile = true, onBack }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.left}>
         {showBack && (
-          <TouchableOpacity onPress={() => router.back()} style={styles.iconButton}>
+          <TouchableOpacity onPress={onBack ?? (() => router.back())} style={styles.iconButton}>
             <Ionicons name="chevron-back" size={24} color={styles.icon.color} />
           </TouchableOpacity>
         )}

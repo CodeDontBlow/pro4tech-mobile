@@ -55,13 +55,13 @@ export default function History() {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <Text style={[globalStyles.title2, styles.title]}>
-          Historico de Chamados
+          Histórico de Chamados
         </Text>
       </View>
 
       <View style={styles.filterContainer}>
         <Ionicons name="calendar-outline" size={20} color={Colors.teal[500]} />
-        <Text style={styles.filterText}>30/04/2026</Text>
+        <Text style={styles.filterText}>05/05/2026</Text>
       </View>
 
 <View style={styles.ticketsContainer}>
