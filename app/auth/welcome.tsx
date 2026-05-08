@@ -1,10 +1,10 @@
-import { router } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 import Button from '@/components/Button/Button';
 import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import { router } from 'expo-router';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function Welcome() {
   return (
@@ -21,7 +21,7 @@ export default function Welcome() {
       <View style={styles.buttonContainer}>
         <Button
           label="Cadastre-se para Começar"
-          onPress={() => router.push('/auth/register')}
+          onPress={() => router.push('/auth/company')}
           variant="light"
         />
         <Text style={[globalStyles.text2, styles.loginText]}>

@@ -1,16 +1,21 @@
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/Input/Input';
 import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import { authService } from '@/services/authService';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
-const TEMP_COMPANY_ID = '019d6787-42ea-7dd1-a8fe-c61c3732c082';
+//const TEMP_COMPANY_ID = '019d6787-42ea-7dd1-a8fe-c61c3732c082';
 
 export default function Register() {
+  const { companyId, companyName } = useLocalSearchParams<{
+    companyId: string;
+    companyName: string;
+  }>();
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,13 +41,15 @@ export default function Register() {
     try {
       setIsLoading(true);
       setHasError(false);
+
       await authService.register({
         name,
         email,
         password,
-        companyId: TEMP_COMPANY_ID,
+        companyId,  // já é o UUID
         role: 'CLIENT',
       });
+
       router.push('/auth/login');
     } catch (error: any) {
       setHasError(true);
@@ -51,6 +58,7 @@ export default function Register() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <View style={styles.container}>
