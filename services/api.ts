@@ -34,9 +34,13 @@ const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  const token = await storage.getItem('orbita_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+  try {
+    const token = await storage.getItem('orbita_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  } catch (e) {
+    console.warn('Token não encontrado:', e);
   }
   return config;
 });
