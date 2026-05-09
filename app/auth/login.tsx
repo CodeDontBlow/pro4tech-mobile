@@ -1,12 +1,12 @@
-import { router } from 'expo-router';
-import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
 import Button from '@/components/Button/Button';
 import InputField from '@/components/Input/Input';
 import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import { authService } from '@/services/authService';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -74,7 +74,7 @@ export default function Login() {
 
       <Text style={[globalStyles.text2, styles.linkText]}>
         Não tem uma conta?{' '}
-        <Text style={styles.link} onPress={() => router.push('/auth/register')}>
+        <Text style={styles.link} onPress={() => router.push('/auth/company')}>
           Cadastrar
         </Text>
       </Text>

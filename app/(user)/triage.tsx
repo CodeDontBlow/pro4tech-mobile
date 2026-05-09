@@ -1,11 +1,11 @@
-import { router } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 import Button from '@/components/Button/Button';
 import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
 import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
 import Colors from '@/constants/colors';
 import api from '@/services/api';
+import { router } from 'expo-router';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native';
 
 type Message = {
   id: string;
@@ -60,10 +60,10 @@ export default function Triage() {
           params: {
             groupName: data.supportGroup.name,
             subjectName: data.subject.name,
-            groupId: data.supportGroup.id,  
+            groupId: data.supportGroup.id,
             subjectId: data.subject.id,
             triageNodeId: data.id
-          } 
+          }
         });
       } else {
         setNode(data);
@@ -183,7 +183,6 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     backgroundColor: Colors.white[500],
-    borderRadius: 12,
     paddingVertical: 16,
     marginBottom: 0,
     marginTop: 0,

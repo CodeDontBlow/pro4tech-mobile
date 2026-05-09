@@ -22,6 +22,12 @@ export const globalStyles = StyleSheet.create({
         lineHeight: 32,
     },
 
+    buttonText: {
+        fontFamily: fonts.martelSans.regular,
+        fontSize: 20,
+        lineHeight: 28,
+    },
+
     subtitle2: {
         fontFamily: fonts.martel.regular,
         fontSize: 20,
