@@ -2,7 +2,7 @@ import React from 'react';
 import { Image, View } from 'react-native';
 import styles from './orbiAvatar.styles';
 
-type Variant = 'default' | 'sleep';
+type Variant = 'default' | 'sleep' | 'elipse' | 'camera';
 
 type Props = {
   variant?: Variant;
@@ -11,6 +11,8 @@ type Props = {
 
 const IMAGES = {
   default: require('@/assets/logos/Orbi.png'),
+  elipse: require('@/assets/logos/orbi_welcome.svg'),
+  camera: require('@/assets/logos/orbi_camera.svg'),
   sleep: require('@/assets/logos/Orbi Sleep.png'),
 };
 

@@ -22,13 +22,12 @@ export default function CompanyCode() {
     const [scanned, setScanned] = useState(false);
     const [permission, requestPermission] = useCameraPermissions();
 
-    // Extrai o código — URL ou código puro
     const extractCode = (data: string): string | null => {
         // Formato do QR: "ID:ABC123;CMP:NomeDaEmpresa"
         const match = data.match(/ID:([^;]+)/);
         if (match) return match[1].trim();
 
-        // Fallback: código digitado manualmente (puro)
+        // Fallback: código digitado manualmente
         const isRawCode = /^[A-Z0-9-]{4,20}$/i.test(data.trim());
         return isRawCode ? data.trim().toUpperCase() : null;
     };
@@ -147,7 +146,7 @@ export default function CompanyCode() {
                         <Text style={styles.overlayHint}>da sua empresa</Text>
                     </View>
 
-                    {/* Botão fechar */}
+
                     <TouchableOpacity
                         style={styles.closeButton}
                         onPress={() => setCameraOpen(false)}

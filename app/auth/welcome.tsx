@@ -9,7 +9,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function Welcome() {
   return (
     <View style={styles.container}>
-      <OrbiAvatar variant="default" size={180} />
+      <OrbiAvatar variant="elipse" size={180} />
 
       <Text style={[globalStyles.title2, styles.welcome]}>Bem-vindo ao</Text>
       <Text style={[globalStyles.title2, styles.title]}>ORBITA</Text>
