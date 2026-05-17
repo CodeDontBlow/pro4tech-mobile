@@ -8,6 +8,7 @@ import DateSeparator from '@/components/DateSeparator/DateSeparator';
 import Header from '@/components/Header/Header';
 import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
 import Alert from '@/components/Alert/Alert';
+import RatingModal from '@/components/RatingScore/RatingScore';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import api from '@/services/api';
@@ -45,6 +46,9 @@ export default function Chat() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [triageHistory, setTriageHistory] = useState<TriageItem[]>([]);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const ratingPromptedRef = useRef(false);
+
   const scrollViewRef = useRef<ScrollView>(null);
   const socketRef = useRef<Socket | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -63,6 +67,11 @@ export default function Chat() {
         if (ticket.status === 'CLOSED') {
           setIsClosed(true);
           stopPolling();
+
+          if (!ratingPromptedRef.current && !ticket.ratingScore) {
+            ratingPromptedRef.current = true;
+            setShowRatingModal(true);
+          }
         }
       }
       if (ticket?.agentId) {
@@ -173,6 +182,19 @@ export default function Chat() {
     setSelectedId(null);
   };
 
+  const handleRatingSubmit = async (score: number, comment: string) => {
+    if (!ticketId) return;
+    await api.patch(`/tickets/${ticketId}`, {
+      ratingScore: score,
+      ...(comment ? { ratingComment: comment } : {}),
+    });
+    setShowRatingModal(false);
+  };
+
+  const handleRatingDismiss = () => {
+    setShowRatingModal(false);
+  };
+
   return (
     <View style={styles.container}>
       <Header title="ORBITA" showBack showProfile onBack={() => router.replace('/(user)/(tabs)')} />
@@ -231,6 +253,12 @@ export default function Chat() {
         cancelLabel="Cancelar"
         onConfirm={handleDelete}
         onCancel={() => setSelectedId(null)}
+      />
+
+      <RatingModal
+        visible={showRatingModal}
+        onSubmit={handleRatingSubmit}
+        onDismiss={handleRatingDismiss}
       />
     </View>
   );
