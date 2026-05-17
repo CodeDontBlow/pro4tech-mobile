@@ -11,58 +11,76 @@ interface RatingModalProps {
   onDismiss: () => void;
 }
 
-interface StarProps {
-  filled: boolean;
-  onPress: () => void;
-  onHoverIn: () => void;
-  onHoverOut: () => void;
-  animatedValue: Animated.Value;
+type OrbiVariant = 'default' | 'sleep' | 'angry' | 'bored' | 'neutral' | 'happy' | 'love';
+
+interface ScoreConfig {
+  label: string;
+  variant: OrbiVariant;
+  activeColor: string;
 }
 
-function Star({ filled, onPress, onHoverIn, onHoverOut, animatedValue }: StarProps) {
-  const scale = animatedValue.interpolate({
+const SCORE_CONFIG: ScoreConfig[] = [
+  { label: 'Péssimo',   variant: 'angry',   activeColor: Colors.red.base    },
+  { label: 'Ruim',      variant: 'bored',   activeColor: Colors.orange.base },
+  { label: 'Regular',   variant: 'neutral', activeColor: Colors.orange[300] },
+  { label: 'Bom',       variant: 'happy',   activeColor: Colors.teal.base   },
+  { label: 'Excelente', variant: 'love',    activeColor: Colors.green.base  },
+];
+
+interface OrbiOptionProps {
+  index: number;
+  selected: boolean;
+  onPress: () => void;
+  scaleAnim: Animated.Value;
+}
+
+function OrbiOption({ index, selected, onPress, scaleAnim }: OrbiOptionProps) {
+  const { label, variant, activeColor } = SCORE_CONFIG[index];
+
+  const scale = scaleAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [1, 1.25],
+    outputRange: [1, 1.18],
   });
 
   return (
-    <Pressable
-      onPress={onPress}
-      onPressIn={onHoverIn}
-      onPressOut={onHoverOut}
-      hitSlop={6}
-      style={styles.starWrapper}
-    >
-      <Animated.Text
+    <Pressable onPress={onPress} hitSlop={4} style={styles.orbiOptionWrapper}>
+      <Animated.View
         style={[
-          styles.starText,
+          styles.orbiOptionAvatar,
           {
             transform: [{ scale }],
-            color: filled ? Colors.orange.base : Colors.white[700],
+            opacity: selected ? 1 : 0.3,
           },
         ]}
       >
-        ★
-      </Animated.Text>
+        <OrbiAvatar variant={variant} size={44} />
+      </Animated.View>
+
+      <Text
+        style={[
+          styles.orbiOptionLabel,
+          selected && { color: activeColor, opacity: 1 },
+        ]}
+        numberOfLines={1}
+      >
+        {label}
+      </Text>
     </Pressable>
   );
 }
 
-const SCORE_LABELS = ['', 'Muito ruim', 'Ruim', 'Regular', 'Bom', 'Excelente'] as const;
-
 export default function RatingModal({ visible, onSubmit, onDismiss }: RatingModalProps) {
   const [score, setScore] = useState(0);
-  const [hoveredIndex, setHoveredIndex] = useState(-1);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const starAnimations = useRef(
+  const scaleAnims = useRef(
     Array.from({ length: 5 }, () => new Animated.Value(0))
   ).current;
 
   const slideAnim = useRef(new Animated.Value(60)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim  = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
@@ -70,7 +88,8 @@ export default function RatingModal({ visible, onSubmit, onDismiss }: RatingModa
       setComment('');
       setError(null);
       setLoading(false);
-      starAnimations.forEach(anim => anim.setValue(0));
+      scaleAnims.forEach(a => a.setValue(0));
+
       Animated.parallel([
         Animated.timing(slideAnim, {
           toValue: 0,
@@ -90,23 +109,21 @@ export default function RatingModal({ visible, onSubmit, onDismiss }: RatingModa
     }
   }, [visible]);
 
-  const animateStar = (index: number, toValue: number) => {
-    Animated.spring(starAnimations[index], {
-      toValue,
-      useNativeDriver: false,
-      speed: 30,
-      bounciness: 10,
-    }).start();
-  };
-
-  const handleStarPress = (index: number) => {
+  const handleOrbiPress = (index: number) => {
     setScore(index + 1);
     setError(null);
-    starAnimations.forEach((_, i) => animateStar(i, i <= index ? 1 : 0));
+    scaleAnims.forEach((anim, i) => {
+      Animated.spring(anim, {
+        toValue: i === index ? 1 : 0,
+        useNativeDriver: false,
+        speed: 28,
+        bounciness: 14,
+      }).start();
+    });
   };
 
   const isCommentRequired = score > 0 && score <= 3;
-  const commentEmpty = comment.trim().length === 0;
+  const commentEmpty      = comment.trim().length === 0;
 
   const handleSubmit = async () => {
     if (score === 0) {
@@ -127,6 +144,8 @@ export default function RatingModal({ visible, onSubmit, onDismiss }: RatingModa
       setLoading(false);
     }
   };
+
+  const headerVariant = score > 0 ? SCORE_CONFIG[score - 1].variant : 'default';
 
   return (
     <Modal
@@ -152,7 +171,7 @@ export default function RatingModal({ visible, onSubmit, onDismiss }: RatingModa
           ]}
         >
           <View style={styles.avatarContainer}>
-            <OrbiAvatar variant="default" size={72} />
+            <OrbiAvatar variant={headerVariant} size={72} />
           </View>
 
           <ScrollView
@@ -165,24 +184,19 @@ export default function RatingModal({ visible, onSubmit, onDismiss }: RatingModa
               Sua opinião é muito importante para melhorarmos nosso suporte.
             </Text>
 
-            <View style={styles.starsRow}>
-              {Array.from({ length: 5 }, (_, i) => (
-                <Star
+            <View style={styles.orbisRow}>
+              {SCORE_CONFIG.map((_, i) => (
+                <OrbiOption
                   key={i}
-                  filled={i < score || i <= hoveredIndex}
-                  onPress={() => handleStarPress(i)}
-                  onHoverIn={() => setHoveredIndex(i)}
-                  onHoverOut={() => setHoveredIndex(-1)}
-                  animatedValue={starAnimations[i]}
+                  index={i}
+                  selected={score === i + 1}
+                  onPress={() => handleOrbiPress(i)}
+                  scaleAnim={scaleAnims[i]}
                 />
               ))}
             </View>
 
-            <View style={styles.scoreLabelContainer}>
-              {score > 0 && (
-                <Text style={styles.scoreLabel}>{SCORE_LABELS[score]}</Text>
-              )}
-            </View>
+            <View style={styles.scoreLabelContainer} />
 
             <Text style={styles.commentLabel}>
               Conte mais sobre sua experiência:
@@ -204,7 +218,6 @@ export default function RatingModal({ visible, onSubmit, onDismiss }: RatingModa
                 if (error) setError(null);
               }}
               editable={!loading}
-              onFocus={() => {}}
             />
 
             {error && <Text style={styles.errorText}>{error}</Text>}

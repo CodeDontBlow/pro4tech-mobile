@@ -36,44 +36,47 @@ export const styles = StyleSheet.create({
   title: {
     fontFamily: fonts.ibmPlex.medium,
     fontSize: 22,
-    color: Colors.teal[700],
+    color: Colors.black.base,
     textAlign: 'center',
     marginBottom: 6,
   },
   subtitle: {
     fontFamily: fonts.ibmPlex.light,
     fontSize: 16,
-    color: Colors.teal[700],
+    color: Colors.black[300],
     textAlign: 'center',
     marginBottom: 20,
     lineHeight: 20,
   },
-  starsRow: {
+  orbisRow: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  orbiOptionWrapper: {
+    alignItems: 'center',
     gap: 8,
-    marginBottom: 6,
+    flex: 1,
   },
-  starWrapper: {
-    padding: 4,
+  orbiOptionAvatar: {
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
   },
-  starText: {
-    fontSize: 40,
+  orbiOptionLabel: {
+    fontFamily: fonts.ibmPlex.regular,
+    fontSize: 10,
+    color: Colors.black[300],
+    opacity: 0.4,
+    textAlign: 'center',
   },
   scoreLabelContainer: {
-    height: 22,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  scoreLabel: {
-    fontFamily: fonts.ibmPlex.light,
-    fontSize: 13,
-    color: Colors.orange.base,
+    height: 8,
+    marginBottom: 14
   },
   commentLabel: {
     fontFamily: fonts.ibmPlex.medium,
     fontSize: 14,
-    color: Colors.teal[700],
+    color: Colors.black.base,
     marginBottom: 8,
   },
   required: {
@@ -86,7 +89,7 @@ export const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: 'transparent',
     padding: 12,
-    fontFamily: fonts.ibmPlex.light,
+    fontFamily: fonts.ibmPlex.regular,
     fontSize: 14,
     color: Colors.black.base,
     minHeight: 96,
@@ -96,7 +99,7 @@ export const styles = StyleSheet.create({
     borderColor: Colors.red.base,
   },
   errorText: {
-    fontFamily: fonts.ibmPlex.bold,
+    fontFamily: fonts.ibmPlex.regular,
     fontSize: 12,
     color: Colors.red.base,
     marginBottom: 12,
