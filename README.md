@@ -12,7 +12,7 @@ orbita-mobile/
 ├── assets/                # Arquivos estáticos
 ├── components/            # Componentes criados
 ├── constants/             # Valores globais (cores, etc.)
-├── hooks/                 # Hooks criados para o projeto
+├── services/              # Serviços da aplicação
 ├── package.json           # Dependências do projeto
 └──  README.md             # Este arquivo
 ```
@@ -43,9 +43,6 @@ orbita-mobile/
 ``` markdown
    # Em dispositivos/emulador Android
    npm run android      
-
-   # Em dispositivos/emulador iOS
-   npm run ios
 
    # No seu navegador
    npm run web
