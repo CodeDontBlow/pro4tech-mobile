@@ -1,6 +1,6 @@
-import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
 import { globalStyles } from '@/constants/globalStyles';
+import React from 'react';
+import { Text, View } from 'react-native';
 import styles from './speechBubble.styles';
 
 type Option = {
@@ -21,7 +21,7 @@ export default function SpeechBubble({ type, text, time, options, onLongPress, o
   const isUser = type === 'user';
 
   return (
-    <TouchableOpacity onLongPress={onLongPress} onPress={onPress} activeOpacity={0.8}>
+    // <TouchableOpacity onLongPress={onLongPress} onPress={onPress} activeOpacity={0.8}>
       <View style={[styles.wrapper, isUser ? styles.userWrapper : styles.botWrapper]}>
         <View style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}>
           <Text style={[globalStyles.text1, styles.text, isUser ? styles.userText : styles.botText]}>
@@ -48,6 +48,6 @@ export default function SpeechBubble({ type, text, time, options, onLongPress, o
           <View style={isUser ? styles.userTail : styles.botTail} />
         </View>
       </View>
-    </TouchableOpacity>
+    // </TouchableOpacity>
   );
 }

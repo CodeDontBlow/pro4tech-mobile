@@ -1,18 +1,18 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { router } from 'expo-router';
-import { io, Socket } from 'socket.io-client';
+import Alert from '@/components/Alert/Alert';
 import ChatInput from '@/components/ChatInput/ChatInput';
 import DateSeparator from '@/components/DateSeparator/DateSeparator';
 import Header from '@/components/Header/Header';
-import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
-import Alert from '@/components/Alert/Alert';
 import RatingModal from '@/components/RatingScore/RatingScore';
+import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import api from '@/services/api';
 import { authService } from '@/services/authService';
+import { Image } from 'expo-image';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { io, Socket } from 'socket.io-client';
 
 type ChatMessage = {
   id: string;
@@ -200,7 +200,13 @@ export default function Chat() {
       <Header title="ORBITA" showBack showProfile onBack={() => router.replace('/(user)/(tabs)')} />
 
       <View style={styles.ticketInfo}>
-        <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
+        <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8}}>
+          <View style={[globalStyles.imgWrapper, {width: 32, height: 32}]}>
+            <Image source={require('../../assets/logos/orbi-dead.png')} style={globalStyles.wrappedImg}/>
+          </View>
+
+          <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
+        </View>
         <View style={[styles.statusBadge, isClosed && styles.statusBadgeClosed]}>
           <Text style={[globalStyles.label1, styles.statusText]}>{ticketStatus}</Text>
         </View>
@@ -223,16 +229,28 @@ export default function Chat() {
           </View>
         ))}
 
-        {orderedMessages.map(message => (
-          <SpeechBubble
-            key={message.id}
-            type={message.senderRole === 'CLIENT' ? 'user' : 'bot'}
-            text={message.deletedAt ? 'Mensagem removida' : message.content}
-            time={formatTime(message.createdAt)}
-            onLongPress={message.senderRole === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
-            onPress={message.senderRole === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
-          />
-        ))}
+        {orderedMessages.map(message => {
+          const sender = message.senderRole
+          return (
+            <View style={sender === 'AGENT' && styles.messageWrapper}>
+
+              {sender !== 'CLIENT' && (
+                <View style={[globalStyles.imgWrapper, {width: 32, height: 32, marginBottom: 20}]}>
+                  <Image source={require('../../assets/logos/orbi-dead.png')} accessibilityLabel='Foto do atendente' style={globalStyles.wrappedImg}/>
+                </View>
+              )}
+
+              <SpeechBubble
+                key={message.id}
+                type={sender === 'CLIENT' ? 'user' : 'bot'}
+                text={message.deletedAt ? 'Mensagem removida' : message.content}
+                time={formatTime(message.createdAt)}
+                onLongPress={sender === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
+                onPress={sender === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
+              />
+            </View>
+          )
+        })}
 
         {isClosed && (
           <View style={styles.closedContainer}>
@@ -265,6 +283,12 @@ export default function Chat() {
 }
 
 const styles = StyleSheet.create({
+  messageWrapper: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 12,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.white[300],
@@ -298,6 +322,8 @@ const styles = StyleSheet.create({
   },
   messages: {
     flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
     paddingHorizontal: 16,
   },
   messagesContent: {
