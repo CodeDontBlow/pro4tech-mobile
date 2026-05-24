@@ -8,7 +8,7 @@ export default function UserTabsLayout() {
     <Tabs
       tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
-        header: () => <Header title="ORBITA" showProfile />,
+        header: () => <Header title="ORBITA" showProfile  profileRoute="/(user)/profile" />,
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Home' }} />

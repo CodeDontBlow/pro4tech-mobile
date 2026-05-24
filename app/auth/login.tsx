@@ -16,23 +16,30 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!email || !password) {
-      setHasError(true);
-      setErrorMessage('Preencha todos os campos.');
-      return;
+  if (!email || !password) {
+    setHasError(true);
+    setErrorMessage('Preencha todos os campos.');
+    return;
+  }
+
+  try {
+    setIsLoading(true);
+    setHasError(false);
+
+    const user = await authService.login({ email, password });
+
+    if (user.role === 'AGENT' || user.role === 'ADMIN') {
+      router.replace('/(agent)/(tabs)');
+    } else {
+      router.replace('/(user)/(tabs)');
     }
 
-    try {
-      setIsLoading(true);
-      setHasError(false);
-      await authService.login({ email, password });
-      router.replace('/(user)/(tabs)');
-    } catch (error: any) {
-      setHasError(true);
-      setErrorMessage(error.response?.data?.message || 'E-mail ou senha incorretos.\nTente novamente');
-    } finally {
-      setIsLoading(false);
-    }
+  } catch (error: any) {
+    setHasError(true);
+    setErrorMessage(error.response?.data?.message || 'E-mail ou senha incorretos.\nTente novamente');
+  } finally {
+    setIsLoading(false);
+  }
   };
 
   return (
