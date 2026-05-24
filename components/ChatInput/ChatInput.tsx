@@ -1,25 +1,30 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React from 'react';
 import { TextInput, TouchableOpacity, View } from 'react-native';
 import Colors from '@/constants/colors';
 import styles from './chatInput.styles';
 
 type Props = {
-  onSend: (text: string) => void;
+  value: string;
+  onChangeText: (value: string) => void;
+  onSend: () => void;
+  onAttachPress?: () => void;
+  isSending?: boolean;
 };
 
-export default function ChatInput({ onSend }: Props) {
-  const [text, setText] = useState('');
-
+export default function ChatInput({ value, onChangeText, onSend, onAttachPress, isSending }: Props) {
   const handleSend = () => {
-    if (!text.trim()) return;
-    onSend(text.trim());
-    setText('');
+    if (!value.trim()) return;
+    onSend();
   };
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.attachButton}>
+      <TouchableOpacity
+        style={styles.attachButton}
+        onPress={onAttachPress}
+        disabled={isSending}
+      >
         <Ionicons name="add-circle-outline" size={28} color={Colors.teal.base} />
       </TouchableOpacity>
 
@@ -27,12 +32,12 @@ export default function ChatInput({ onSend }: Props) {
         style={styles.input}
         placeholder="Digite sua mensagem ...."
         placeholderTextColor={Colors.white[700]}
-        value={text}
-        onChangeText={setText}
+        value={value}
+        onChangeText={onChangeText}
         multiline
       />
 
-      <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+      <TouchableOpacity style={styles.sendButton} onPress={handleSend} disabled={isSending}>
         <Ionicons name="send" size={20} color={Colors.white[300]} />
       </TouchableOpacity>
     </View>
