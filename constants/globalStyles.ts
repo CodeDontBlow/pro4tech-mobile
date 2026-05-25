@@ -1,5 +1,4 @@
 import { StyleSheet } from 'react-native';
-import Colors from './colors';
 import { fonts } from './fonts';
 
 export const globalStyles = StyleSheet.create({
@@ -50,17 +49,4 @@ export const globalStyles = StyleSheet.create({
         fontSize: 14,
         lineHeight: 16,
     },
-    imgWrapper: {
-        backgroundColor: Colors.white[700],
-        borderColor: Colors.white[700],
-        borderRadius: 9999,
-        justifyContent: 'center',
-        alignItems: 'center',
-        overflow: 'hidden',
-    },
-    wrappedImg: {
-        width: '100%',
-        height: '100%',
-        objectFit: 'cover',
-    }
 });

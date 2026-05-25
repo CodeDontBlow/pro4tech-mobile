@@ -1,4 +1,5 @@
 import Alert from '@/components/Alert/Alert';
+import Avatar from '@/components/Avatar/Avatar';
 import ChatInput from '@/components/ChatInput/ChatInput';
 import DateSeparator from '@/components/DateSeparator/DateSeparator';
 import FilePreview from '@/components/FilePreview/FilePreview';
@@ -14,7 +15,6 @@ import {
   uploadChatAttachments,
 } from '@/services/upload';
 import * as DocumentPicker from 'expo-document-picker';
-import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -262,9 +262,7 @@ export default function Chat() {
 
       <View style={styles.ticketInfo}>
         <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8}}>
-          <View style={[globalStyles.imgWrapper, {width: 32, height: 32}]}>
-            <Image source={require('../../assets/logos/orbi-dead.png')} style={globalStyles.wrappedImg}/>
-          </View>
+          <Avatar src={undefined} alt="Avatar do atendente" ratio={36} />
 
           <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
         </View>
@@ -285,27 +283,29 @@ export default function Chat() {
 
         {triageHistory.map((item, index) => (
           <View key={`triage-${index}`}>
-            <SpeechBubble type="bot" text={item.question} time={undefined} />
+            <View style={styles.messageWrapper}>
+              <Avatar bot={true} alt="Avatar do Orbi" style={{marginBottom: 20}} />
+              <SpeechBubble type="bot" text={item.question} time={undefined} />
+            </View>
             <SpeechBubble type="user" text={item.answer} time={undefined} />
           </View>
         ))}
 
         {orderedMessages.map(message => {
           const sender = message.senderRole
+          console.log(message)
           return (
             <View style={sender === 'AGENT' && styles.messageWrapper}>
 
               {sender !== 'CLIENT' && (
-                <View style={[globalStyles.imgWrapper, {width: 32, height: 32, marginBottom: 20}]}>
-                  <Image source={require('../../assets/logos/orbi-dead.png')} accessibilityLabel='Foto do atendente' style={globalStyles.wrappedImg}/>
-                </View>
+                <Avatar src={undefined} alt="Avatar do atendente" style={{marginBottom: 20}} />
               )}
 
               <SpeechBubble
                 key={message.id}
                 type={sender === 'CLIENT' ? 'user' : 'bot'}
                 text={message.deletedAt ? 'Mensagem removida' : message.content ?? ''}
-            attachments={message.deletedAt ? [] : message.attachments}
+                attachments={message.deletedAt ? [] : message.attachments}
                 time={formatTime(message.createdAt)}
                 onLongPress={sender === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
                 onPress={sender === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
