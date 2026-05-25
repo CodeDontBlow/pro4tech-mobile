@@ -1,6 +1,7 @@
 import Alert from '@/components/Alert/Alert';
 import ChatInput from '@/components/ChatInput/ChatInput';
 import DateSeparator from '@/components/DateSeparator/DateSeparator';
+import FilePreview from '@/components/FilePreview/FilePreview';
 import Header from '@/components/Header/Header';
 import RatingModal from '@/components/RatingScore/RatingScore';
 import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
@@ -8,6 +9,11 @@ import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import api from '@/services/api';
 import { authService } from '@/services/authService';
+import {
+  LocalAttachment,
+  uploadChatAttachments,
+} from '@/services/upload';
+import * as DocumentPicker from 'expo-document-picker';
 import { Image } from 'expo-image';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -19,7 +25,13 @@ type ChatMessage = {
   ticketId: string;
   senderId: string;
   senderRole: 'CLIENT' | 'AGENT' | 'ADMIN';
-  content: string;
+  content?: string;
+  attachments?: {
+    url: string;
+    mimeType: string;
+    originalName: string;
+    size: number;
+  }[];
   createdAt: string;
   editedAt?: string | null;
   deletedAt?: string | null;
@@ -47,6 +59,10 @@ export default function Chat() {
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [triageHistory, setTriageHistory] = useState<TriageItem[]>([]);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [messageText, setMessageText] = useState('');
+  const [pendingFiles, setPendingFiles] = useState<LocalAttachment[]>([]);
+  const [showFilePreview, setShowFilePreview] = useState(false);
   const ratingPromptedRef = useRef(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
@@ -162,12 +178,57 @@ export default function Chat() {
     );
   }, [messages]);
 
-  const handleSend = (text: string) => {
-    if (!ticketId || !text.trim() || isClosed) return;
+  const handleSend = () => {
+    if (!ticketId || !messageText.trim() || isClosed) return;
     socketRef.current?.emit('sendMessage', {
       ticketId,
-      content: text.trim(),
+      content: messageText.trim(),
     });
+    setMessageText('');
+  };
+
+  const handleSendAttachments = async () => {
+    if (!ticketId || isClosed || pendingFiles.length === 0) return;
+
+    try {
+      setIsUploading(true);
+      const attachments = await uploadChatAttachments(ticketId, pendingFiles);
+
+      socketRef.current?.emit('sendMessage', {
+        ticketId,
+        content: messageText.trim() || undefined,
+        attachments,
+      });
+      setMessageText('');
+      setPendingFiles([]);
+      setShowFilePreview(false);
+    } catch (error) {
+      console.error('Erro ao enviar anexos', error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleAttachPress = async () => {
+    if (isClosed || isUploading) return;
+
+    const result = await DocumentPicker.getDocumentAsync({
+      type: '*/*',
+      multiple: true,
+      copyToCacheDirectory: true,
+    });
+
+    if (result.canceled) return;
+
+    const files: LocalAttachment[] = result.assets.map((asset) => ({
+      uri: asset.uri,
+      name: asset.name ?? 'arquivo',
+      mimeType: asset.mimeType,
+      file: (asset as any).file ?? null,
+    }));
+
+    setPendingFiles(files);
+    setShowFilePreview(true);
   };
 
   const handleDelete = () => {
@@ -243,7 +304,8 @@ export default function Chat() {
               <SpeechBubble
                 key={message.id}
                 type={sender === 'CLIENT' ? 'user' : 'bot'}
-                text={message.deletedAt ? 'Mensagem removida' : message.content}
+                text={message.deletedAt ? 'Mensagem removida' : message.content ?? ''}
+            attachments={message.deletedAt ? [] : message.attachments}
                 time={formatTime(message.createdAt)}
                 onLongPress={sender === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
                 onPress={sender === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
@@ -261,7 +323,29 @@ export default function Chat() {
         )}
       </ScrollView>
 
-      {!isClosed && <ChatInput onSend={handleSend} />}
+      {!isClosed && (
+        <ChatInput
+          value={messageText}
+          onChangeText={setMessageText}
+          onSend={handleSend}
+          onAttachPress={handleAttachPress}
+          isSending={isUploading}
+        />
+      )}
+
+      <FilePreview
+        visible={showFilePreview}
+        files={pendingFiles}
+        onCancel={() => {
+          setPendingFiles([]);
+          setShowFilePreview(false);
+        }}
+        onRemove={(index) =>
+          setPendingFiles((prev) => prev.filter((_, i) => i !== index))
+        }
+        onConfirm={handleSendAttachments}
+        isSending={isUploading}
+      />
 
       <Alert
         visible={selectedId !== null}

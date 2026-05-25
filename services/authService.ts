@@ -25,8 +25,12 @@ type LoginResponse = {
   access_token: string;
 };
 
-
-type User = { id : string; name: string; email: string;}; 
+type User = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'CLIENT' | 'AGENT' | 'ADMIN';
+};
   
 async function getName(): Promise<User> {
   const { data } = await api.get<User>('/user/me');
@@ -40,9 +44,14 @@ export const authService = {
     return data;
   },
 
-  async login(payload: LoginPayload): Promise<void> {
-    const { data } = await api.post<LoginResponse>('/auth/login', payload);
-    await storage.setItem('orbita_token', data.access_token);
+  async login(payload: LoginPayload): Promise<User> {
+  const { data } = await api.post<LoginResponse>('/auth/login', payload);
+
+  await storage.setItem('orbita_token', data.access_token);
+
+  const user = await getName();
+
+  return user;
   },
 
   async logout(): Promise<void> {

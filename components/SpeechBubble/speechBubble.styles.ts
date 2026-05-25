@@ -93,4 +93,60 @@ export default StyleSheet.create({
   timeBot: {
     color: Colors.black[300],
   },
+  attachments: {
+    marginTop: 12,
+    gap: 8,
+  },
+  attachmentCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 12,
+    padding: 10,
+    gap: 10,
+  },
+  attachmentCardBot: {
+    backgroundColor: Colors.white[300],
+    borderWidth: 1,
+    borderColor: Colors.white[700],
+  },
+  attachmentCardUser: {
+    backgroundColor: Colors.teal[700],
+  },
+  attachmentImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+  },
+  attachmentIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.white[500],
+  },
+  attachmentInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  attachmentName: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  attachmentNameBot: {
+    color: Colors.black.base,
+  },
+  attachmentNameUser: {
+    color: Colors.white[300],
+  },
+  attachmentSize: {
+    fontSize: 10,
+    marginTop: 2,
+  },
+  attachmentSizeBot: {
+    color: Colors.black[300],
+  },
+  attachmentSizeUser: {
+    color: Colors.white[500],
+  },
 });
