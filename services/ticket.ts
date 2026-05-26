@@ -62,4 +62,18 @@ export const ticketService = {
     });
     return data;
   },
+
+  async assignToMe(
+    ticketId:string
+  ):Promise<TicketResponse>{
+
+    const {data}
+    =
+    await api.patch<TicketResponse>(
+      `/tickets/${ticketId}/assign-self`
+    );
+
+    return data;
+
+  }
 };
