@@ -1,24 +1,29 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import { router } from 'expo-router';
-import { io, Socket } from 'socket.io-client';
-import * as DocumentPicker from 'expo-document-picker';
+import Alert from '@/components/Alert/Alert';
+import Avatar from '@/components/Avatar/Avatar';
 import ChatInput from '@/components/ChatInput/ChatInput';
 import DateSeparator from '@/components/DateSeparator/DateSeparator';
-import Header from '@/components/Header/Header';
-import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
-import Alert from '@/components/Alert/Alert';
-import RatingModal from '@/components/RatingScore/RatingScore';
 import FilePreview from '@/components/FilePreview/FilePreview';
+import Header from '@/components/Header/Header';
+import RatingModal from '@/components/RatingScore/RatingScore';
+import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import {
+  CLOSED_LIKE_STATUSES,
+  statusLabelMap,
+  type TicketStatus,
+} from '@/constants/ticket-status';
 import api from '@/services/api';
 import { authService } from '@/services/authService';
 import {
   LocalAttachment,
   uploadChatAttachments,
 } from '@/services/upload';
+import * as DocumentPicker from 'expo-document-picker';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { io, Socket } from 'socket.io-client';
 
 type ChatMessage = {
   id: string;
@@ -56,6 +61,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [ticketStatus, setTicketStatus] = useState<string>('Aguardando');
   const [agentLabel, setAgentLabel] = useState<string>('Atendente');
+  const [agentAvatarUrl, setAgentAvatarUrl] = useState<string | null>(null);
   const [isClosed, setIsClosed] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -81,8 +87,13 @@ export default function Chat() {
       const response = await api.get(`/tickets/${ticketId}`);
       const ticket = response.data;
       if (ticket?.status) {
-        setTicketStatus(ticket.status);
-        const closedLike = CLOSED_LIKE_STATUSES.includes(ticket.status);
+        const statusLabel =
+          statusLabelMap[ticket.status as TicketStatus] ?? ticket.status;
+        const closedLike = CLOSED_LIKE_STATUSES.includes(
+          ticket.status as TicketStatus
+        );
+
+        setTicketStatus(statusLabel);
         setIsClosed(closedLike);
 
         if (closedLike) {
@@ -95,8 +106,9 @@ export default function Chat() {
         }
       }
       if (ticket?.agentId) {
-        setAgentLabel('Atendente conectado');
+        setAgentLabel(ticket.agent?.user?.name ?? 'Atendente');
       }
+      setAgentAvatarUrl(ticket?.agent?.user?.avatarUrl ?? null);
     } catch (err) {
       console.error('Erro ao carregar ticket', err);
     }
@@ -265,7 +277,11 @@ export default function Chat() {
       <Header title="ORBITA" showBack showProfile onBack={() => router.replace('/(user)/(tabs)')} />
 
       <View style={styles.ticketInfo}>
-        <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
+        <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8}}>
+          <Avatar src={agentAvatarUrl ?? undefined} alt="Avatar do atendente" ratio={36} />
+
+          <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
+        </View>
         <View style={[styles.statusBadge, isClosed && styles.statusBadgeClosed]}>
           <Text style={[globalStyles.label1, styles.statusText]}>{ticketStatus}</Text>
         </View>
@@ -283,22 +299,41 @@ export default function Chat() {
 
         {triageHistory.map((item, index) => (
           <View key={`triage-${index}`}>
-            <SpeechBubble type="bot" text={item.question} time={undefined} />
+            <View style={styles.messageWrapper}>
+              <Avatar bot={true} alt="Avatar do Orbi" style={{marginBottom: 20}} />
+              <SpeechBubble type="bot" text={item.question} time={undefined} />
+            </View>
             <SpeechBubble type="user" text={item.answer} time={undefined} />
           </View>
         ))}
 
-        {orderedMessages.map(message => (
-          <SpeechBubble
-            key={message.id}
-            type={message.senderRole === 'CLIENT' ? 'user' : 'bot'}
-            text={message.deletedAt ? 'Mensagem removida' : message.content ?? ''}
-            attachments={message.deletedAt ? [] : message.attachments}
-            time={formatTime(message.createdAt)}
-            onLongPress={message.senderRole === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
-            onPress={message.senderRole === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
-          />
-        ))}
+        {orderedMessages.map((message, index) => {
+          const sender = message.senderRole;
+          return (
+            <View
+              key={`${message.id}-${message.createdAt}-${index}`}
+              style={sender === 'AGENT' && styles.messageWrapper}
+            >
+
+              {sender !== 'CLIENT' && (
+                <Avatar
+                  src={agentAvatarUrl ?? undefined}
+                  alt="Avatar do atendente"
+                  style={{marginBottom: 20}}
+                />
+              )}
+
+              <SpeechBubble
+                type={sender === 'CLIENT' ? 'user' : 'bot'}
+                text={message.deletedAt ? 'Mensagem removida' : message.content ?? ''}
+                attachments={message.deletedAt ? [] : message.attachments}
+                time={formatTime(message.createdAt)}
+                onLongPress={sender === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
+                onPress={sender === 'CLIENT' ? () => setSelectedId(message.id) : undefined}
+              />
+            </View>
+          )
+        })}
 
         {isClosed && (
           <View style={styles.closedContainer}>
@@ -353,6 +388,12 @@ export default function Chat() {
 }
 
 const styles = StyleSheet.create({
+  messageWrapper: {
+    display: 'flex',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 12,
+  },
   container: {
     flex: 1,
     backgroundColor: Colors.white[300],
@@ -366,7 +407,7 @@ const styles = StyleSheet.create({
   },
   agentName: {
     color: Colors.black.base,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   statusBadge: {
     backgroundColor: Colors.green.base,
@@ -386,6 +427,8 @@ const styles = StyleSheet.create({
   },
   messages: {
     flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
     paddingHorizontal: 16,
   },
   messagesContent: {

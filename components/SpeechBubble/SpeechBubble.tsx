@@ -1,7 +1,7 @@
+import { globalStyles } from '@/constants/globalStyles';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Image, Linking, Text, TouchableOpacity, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { globalStyles } from '@/constants/globalStyles';
 import styles from './speechBubble.styles';
 
 type Option = {
@@ -54,7 +54,7 @@ export default function SpeechBubble({
   const items = attachments ?? [];
 
   return (
-    <TouchableOpacity onLongPress={onLongPress} onPress={onPress} activeOpacity={0.8}>
+    // <TouchableOpacity onLongPress={onLongPress} onPress={onPress} activeOpacity={0.8}>
       <View style={[styles.wrapper, isUser ? styles.userWrapper : styles.botWrapper]}>
         <View style={[styles.bubble, isUser ? styles.userBubble : styles.botBubble]}>
           {!!text && (
@@ -131,6 +131,6 @@ export default function SpeechBubble({
           <View style={isUser ? styles.userTail : styles.botTail} />
         </View>
       </View>
-    </TouchableOpacity>
+    // </TouchableOpacity>
   );
 }
