@@ -52,8 +52,6 @@ const formatTime = (value?: string) => {
   return new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 };
 
-const CLOSED_LIKE_STATUSES = ['CLOSED', 'RESOLVED'];
-
 export default function Chat() {
   const params = useLocalSearchParams<{ ticketId?: string | string[] }>();
   const ticketId = Array.isArray(params.ticketId) ? params.ticketId[0] : params.ticketId;
