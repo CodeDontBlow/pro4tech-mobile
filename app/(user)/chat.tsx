@@ -8,6 +8,7 @@ import RatingModal from '@/components/RatingScore/RatingScore';
 import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import { statusLabelMap, type TicketStatus } from '@/constants/ticket-status';
 import api from '@/services/api';
 import { authService } from '@/services/authService';
 import {
@@ -54,6 +55,7 @@ export default function Chat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [ticketStatus, setTicketStatus] = useState<string>('Aguardando');
   const [agentLabel, setAgentLabel] = useState<string>('Atendente');
+  const [agentAvatarUrl, setAgentAvatarUrl] = useState<string | null>(null);
   const [isClosed, setIsClosed] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [authToken, setAuthToken] = useState<string | null>(null);
@@ -79,7 +81,9 @@ export default function Chat() {
       const response = await api.get(`/tickets/${ticketId}`);
       const ticket = response.data;
       if (ticket?.status) {
-        setTicketStatus(ticket.status);
+        const statusLabel =
+          statusLabelMap[ticket.status as TicketStatus] ?? ticket.status;
+        setTicketStatus(statusLabel);
         if (ticket.status === 'CLOSED') {
           setIsClosed(true);
           stopPolling();
@@ -91,8 +95,9 @@ export default function Chat() {
         }
       }
       if (ticket?.agentId) {
-        setAgentLabel('Atendente conectado');
+        setAgentLabel(ticket.agent?.user?.name ?? 'Atendente');
       }
+      setAgentAvatarUrl(ticket?.agent?.user?.avatarUrl ?? null);
     } catch (err) {
       console.error('Erro ao carregar ticket', err);
     }
@@ -262,7 +267,7 @@ export default function Chat() {
 
       <View style={styles.ticketInfo}>
         <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8}}>
-          <Avatar src={undefined} alt="Avatar do atendente" ratio={36} />
+          <Avatar src={agentAvatarUrl ?? undefined} alt="Avatar do atendente" ratio={36} />
 
           <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
         </View>
@@ -291,18 +296,23 @@ export default function Chat() {
           </View>
         ))}
 
-        {orderedMessages.map(message => {
-          const sender = message.senderRole
-          console.log(message)
+        {orderedMessages.map((message, index) => {
+          const sender = message.senderRole;
           return (
-            <View style={sender === 'AGENT' && styles.messageWrapper}>
+            <View
+              key={`${message.id}-${message.createdAt}-${index}`}
+              style={sender === 'AGENT' && styles.messageWrapper}
+            >
 
               {sender !== 'CLIENT' && (
-                <Avatar src={undefined} alt="Avatar do atendente" style={{marginBottom: 20}} />
+                <Avatar
+                  src={agentAvatarUrl ?? undefined}
+                  alt="Avatar do atendente"
+                  style={{marginBottom: 20}}
+                />
               )}
 
               <SpeechBubble
-                key={message.id}
                 type={sender === 'CLIENT' ? 'user' : 'bot'}
                 text={message.deletedAt ? 'Mensagem removida' : message.content ?? ''}
                 attachments={message.deletedAt ? [] : message.attachments}
@@ -386,7 +396,7 @@ const styles = StyleSheet.create({
   },
   agentName: {
     color: Colors.black.base,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   statusBadge: {
     backgroundColor: Colors.green.base,

@@ -1,14 +1,8 @@
 import { globalStyles } from "@/constants/globalStyles";
+import { statusLabelMap, type TicketStatus } from "@/constants/ticket-status";
 import React from "react";
 import { Image, Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import styles from "./ticketcard.styles";
-
-export type TicketStatus =
-  | 'TRIAGE'
-  | 'OPENED'
-  | 'ESCALATED'
-  | 'CLOSED'
-  | 'RESOLVED';
 
 type Ticket = {
   id: string;
@@ -21,14 +15,6 @@ type Props = {
   ticket: Ticket;
   onPress?: (ticketId: string) => void;
   cardStyle?: StyleProp<ViewStyle>;
-};
-
-const statusLabelMap: Record<TicketStatus, string> = {
-  TRIAGE: 'Triagem',
-  OPENED: 'Aberto',
-  ESCALATED: 'Escalado',
-  CLOSED: 'Encerrado',
-  RESOLVED: 'Resolvido',
 };
 
 export default function TicketCard({ ticket, onPress, cardStyle }: Props) {
