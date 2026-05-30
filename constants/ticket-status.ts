@@ -12,3 +12,5 @@ export const statusLabelMap: Record<TicketStatus, string> = {
   CLOSED: 'Encerrado',
   RESOLVED: 'Resolvido',
 };
+
+export const CLOSED_LIKE_STATUSES: TicketStatus[] = ['CLOSED', 'RESOLVED'];

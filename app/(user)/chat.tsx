@@ -8,7 +8,11 @@ import RatingModal from '@/components/RatingScore/RatingScore';
 import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
-import { statusLabelMap, type TicketStatus } from '@/constants/ticket-status';
+import {
+  CLOSED_LIKE_STATUSES,
+  statusLabelMap,
+  type TicketStatus,
+} from '@/constants/ticket-status';
 import api from '@/services/api';
 import { authService } from '@/services/authService';
 import {
@@ -83,9 +87,14 @@ export default function Chat() {
       if (ticket?.status) {
         const statusLabel =
           statusLabelMap[ticket.status as TicketStatus] ?? ticket.status;
+        const closedLike = CLOSED_LIKE_STATUSES.includes(
+          ticket.status as TicketStatus
+        );
+
         setTicketStatus(statusLabel);
-        if (ticket.status === 'CLOSED') {
-          setIsClosed(true);
+        setIsClosed(closedLike);
+
+        if (closedLike) {
           stopPolling();
 
           if (!ratingPromptedRef.current && !ticket.ratingScore) {

@@ -1,5 +1,9 @@
 import { globalStyles } from "@/constants/globalStyles";
-import { statusLabelMap, type TicketStatus } from "@/constants/ticket-status";
+import {
+  CLOSED_LIKE_STATUSES,
+  statusLabelMap,
+  type TicketStatus,
+} from "@/constants/ticket-status";
 import React from "react";
 import { Image, Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import styles from "./ticketcard.styles";
@@ -19,7 +23,7 @@ type Props = {
 
 export default function TicketCard({ ticket, onPress, cardStyle }: Props) {
   const statusLabel = statusLabelMap[ticket.status] ?? ticket.status;
-  const isClosed = ticket.status === 'CLOSED' || ticket.status === 'RESOLVED';
+  const isClosed = CLOSED_LIKE_STATUSES.includes(ticket.status);
   const avatarUri = ticket.agent.avatar?.trim()
     ? ticket.agent.avatar
     : 'https://via.placeholder.com/44';
