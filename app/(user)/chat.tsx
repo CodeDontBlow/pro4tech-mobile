@@ -47,6 +47,8 @@ const formatTime = (value?: string) => {
   return new Date(value).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 };
 
+const CLOSED_LIKE_STATUSES = ['CLOSED', 'RESOLVED'];
+
 export default function Chat() {
   const params = useLocalSearchParams<{ ticketId?: string | string[] }>();
   const ticketId = Array.isArray(params.ticketId) ? params.ticketId[0] : params.ticketId;
@@ -80,8 +82,10 @@ export default function Chat() {
       const ticket = response.data;
       if (ticket?.status) {
         setTicketStatus(ticket.status);
-        if (ticket.status === 'CLOSED') {
-          setIsClosed(true);
+        const closedLike = CLOSED_LIKE_STATUSES.includes(ticket.status);
+        setIsClosed(closedLike);
+
+        if (closedLike) {
           stopPolling();
 
           if (!ratingPromptedRef.current && !ticket.ratingScore) {
