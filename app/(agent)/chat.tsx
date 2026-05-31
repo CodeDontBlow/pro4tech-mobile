@@ -7,6 +7,7 @@ import Button from '@/components/Button/Button';
 import ChatInput from '@/components/ChatInput/ChatInput';
 import DateSeparator from '@/components/DateSeparator/DateSeparator';
 import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
+import Avatar from '@/components/Avatar/Avatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import api from '@/services/api';
@@ -184,14 +185,21 @@ export default function AgentChat() {
       />
 
       <View style={styles.ticketInfo}>
-        <Text
-          numberOfLines={1}
-          style={[globalStyles.text2, styles.ticketTitle]}
-        >
-          {ticket?.subject?.name ?? 'Chamado'}
-          {' - '}
-          {ticket?.company?.name ?? ''}
-        </Text>
+        <View style={styles.ticketTitleGroup}>
+          <Avatar
+            src={ticket?.client?.avatarUrl ?? ticket?.company?.logoUrl}
+            alt="Avatar do cliente"
+            ratio={36}
+          />
+          <Text
+            numberOfLines={1}
+            style={[globalStyles.text2, styles.ticketTitle]}
+          >
+            {ticket?.client?.name ?? 'Cliente'}
+            {' - '}
+            {ticket?.subject?.name ?? 'Chamado'}
+          </Text>
+        </View>
 
         {!isClosed ? (
           <Button
@@ -220,19 +228,31 @@ export default function AgentChat() {
       >
         <DateSeparator label={new Date().toLocaleDateString('pt-BR')} />
 
-        {orderedMessages.map((message) => (
-          <SpeechBubble
-            key={message.id}
-            type={
-              message.senderRole === 'AGENT' || message.senderRole === 'ADMIN'
-                ? 'user'
-                : 'bot'
-            }
-            text={message.deletedAt ? 'Mensagem removida' : message.content ?? ''}
-            attachments={message.attachments}
-            time={formatTime(message.createdAt)}
-          />
-        ))}
+        {orderedMessages.map((message) => {
+          const fromClient = message.senderRole === 'CLIENT';
+
+          return (
+            <View
+              key={message.id}
+              style={fromClient ? styles.messageWrapper : undefined}
+            >
+              {fromClient && (
+                <Avatar
+                  src={ticket?.client?.avatarUrl ?? ticket?.company?.logoUrl}
+                  alt="Avatar do cliente"
+                  style={{ marginBottom: 20 }}
+                />
+              )}
+
+              <SpeechBubble
+                type={fromClient ? 'bot' : 'user'}
+                text={message.deletedAt ? 'Mensagem removida' : message.content ?? ''}
+                attachments={message.attachments}
+                time={formatTime(message.createdAt)}
+              />
+            </View>
+          );
+        })}
       </ScrollView>
 
       {!isClosed && (
@@ -259,10 +279,22 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     gap: 12,
   },
+  ticketTitleGroup: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    minWidth: 0,
+  },
   ticketTitle: {
     flex: 1,
     color: Colors.black.base,
     fontWeight: 'bold',
+  },
+  messageWrapper: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 12,
   },
   closeButton: {
     width: 95,
