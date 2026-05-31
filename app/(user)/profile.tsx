@@ -23,10 +23,16 @@ type UserInfo = {
   name: string;
   email: string;
   companyId: string;
+  companyName: string;
 };
 
 export default function Profile() {
-  const [user, setUser] = useState<UserInfo>({ name: '', email: '', companyId: '' });
+  const [user, setUser] = useState<UserInfo>({
+    name: '',
+    email: '',
+    companyId: '',
+    companyName: '',
+  });
   const [notifications, setNotifications] = useState(true);
   const [photo, setPhoto] = useState<string | null>(null);
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
@@ -43,10 +49,24 @@ export default function Profile() {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = response.data;
+      let companyName = '';
+
+      if (data.companyId) {
+        try {
+          const companyResponse = await api.get(`/company/${data.companyId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          companyName = companyResponse.data?.name ?? '';
+        } catch (companyError) {
+          console.warn('Erro ao carregar empresa:', companyError);
+        }
+      }
+
       setUser({
         name: data.name,
         email: data.email,
         companyId: data.companyId,
+        companyName,
       });
     } catch (err) {
       console.warn('Erro ao carregar usuário:', err);
@@ -122,7 +142,9 @@ export default function Profile() {
         <View style={styles.card}>
           <View style={styles.infoRow}>
             <Text style={[globalStyles.text1, styles.infoLabel]}>Empresa:</Text>
-            <Text style={[globalStyles.text1, styles.infoValue]} numberOfLines={1}>{user.companyId}</Text>
+            <Text style={[globalStyles.text1, styles.infoValue]} numberOfLines={1}>
+              {user.companyName || user.companyId}
+            </Text>
           </View>
           <View style={styles.divider} />
           <View style={styles.infoRow}>

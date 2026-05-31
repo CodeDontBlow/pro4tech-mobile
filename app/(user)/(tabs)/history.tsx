@@ -64,7 +64,7 @@ export default function History() {
         <Text style={styles.filterText}>05/05/2026</Text>
       </View>
 
-<View style={styles.ticketsContainer}>
+      <View style={styles.ticketsContainer}>
         {loading ? (
           <ActivityIndicator size="large" color={Colors.teal.base} />
         ) : error ? (
@@ -80,11 +80,11 @@ export default function History() {
               />
             )}
             ListEmptyComponent={
-              <Text style={[globalStyles.text2,styles.emptyText, styles.description]}>Nenhum chamado encontrado</Text>
+              <Text style={[globalStyles.text2, styles.emptyText, styles.description]}>Nenhum chamado encontrado</Text>
             }
           />
         )}
-        </View>
+      </View>
     </View>
   );
 }
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 16,
     color: Colors.black.base,
-  },  
+  },
   description: {
     textAlign: 'center',
     marginTop: 12,
