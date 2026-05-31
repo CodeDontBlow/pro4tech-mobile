@@ -22,6 +22,7 @@ export default function CompanyCode() {
     const [cameraOpen, setCameraOpen] = useState(false);
     const [codeOpen, setCodeOpen] = useState(false);
     const [scanned, setScanned] = useState(false);
+    const [companyError, setCompanyError] = useState('');
     const [permission, requestPermission] = useCameraPermissions();
 
     const extractCode = (data: string): string | null => {
@@ -37,7 +38,7 @@ export default function CompanyCode() {
     const handleQRScanned = ({ data }: { data: string }) => {
         if (scanned) return;
         setScanned(true);
-        setCameraOpen(false);
+        setCompanyError('');
 
         const code = extractCode(data);
         if (!code) {
@@ -52,13 +53,16 @@ export default function CompanyCode() {
     const handleManualSubmit = () => {
         const code = manualCode.trim().toUpperCase();
         if (!code) return;
-        setCodeOpen(false);
+        setCompanyError('');
         goToRegister(code);
     };
 
     const goToRegister = async (code: string) => {
         try {
             const company = await authService.getCompanyByCode(code);
+            setCompanyError('');
+            setCameraOpen(false);
+            setCodeOpen(false);
             router.push({
                 pathname: '/auth/register',
                 params: {
@@ -67,9 +71,8 @@ export default function CompanyCode() {
                 },
             });
         } catch (error) {
-            Alert.alert('Código inválido', 'Não encontramos uma empresa com esse código.');
+            setCompanyError('Empresa não encontrada');
             setScanned(false);
-            setManualCode('');
         }
     };
 
@@ -81,6 +84,7 @@ export default function CompanyCode() {
                 return;
             }
         }
+        setCompanyError('');
         setScanned(false);
         setCodeOpen(false);  // fecha o de código se estiver aberto
         setCameraOpen(true);
@@ -101,7 +105,13 @@ export default function CompanyCode() {
             </TouchableOpacity>
 
             {/* Botão código manual */}
-            <TouchableOpacity style={styles.codeButton} onPress={() => setCodeOpen(true)}>
+            <TouchableOpacity
+                style={styles.codeButton}
+                onPress={() => {
+                    setCompanyError('');
+                    setCodeOpen(true);
+                }}
+            >
                 <Ionicons name="pencil-outline" size={28} color={Colors.white[300]} />
                 <Text style={[globalStyles.text1, styles.codeButtonText]}>Entrar com código</Text>
                 <Ionicons name="chevron-forward" size={20} color={Colors.white[300]} />
@@ -135,13 +145,23 @@ export default function CompanyCode() {
                         Escaneie o QR Code para começar a configurar seu perfil.
                     </Text>
 
+                    {!!companyError && (
+                        <Text style={styles.errorText}>{companyError}</Text>
+                    )}
+
 
                     <Button variant="primary"
                         label="Entrar com código manual"
-                        onPress={() => { setCameraOpen(false); setCodeOpen(true); }}>
+                        onPress={() => { setCameraOpen(false); setCompanyError(''); setCodeOpen(true); }}>
                     </Button>
 
-                    <TouchableOpacity style={styles.closeButton} onPress={() => setCameraOpen(false)}>
+                    <TouchableOpacity
+                        style={styles.closeButton}
+                        onPress={() => {
+                            setCompanyError('');
+                            setCameraOpen(false);
+                        }}
+                    >
                         <Ionicons name="close" size={28} color={Colors.white[300]} />
                     </TouchableOpacity>
                 </View>
@@ -154,6 +174,10 @@ export default function CompanyCode() {
                     <Text style={[globalStyles.title2, styles.codeTitle]}>
                         Digite o código para continuar
                     </Text>
+
+                    {!!companyError && (
+                        <Text style={styles.errorText}>{companyError}</Text>
+                    )}
 
                     <TextInput
                         style={styles.input}
@@ -173,9 +197,9 @@ export default function CompanyCode() {
                     />
 
                     <Button label="Escanear QR Code" variant="primary"
-                        onPress={() => { setCodeOpen(false); openCamera(); }} />
+                        onPress={() => { setCodeOpen(false); setCompanyError(''); openCamera(); }} />
 
-                    <TouchableOpacity style={styles.closeButton} onPress={() => { setCodeOpen(false); setManualCode(''); }}>
+                    <TouchableOpacity style={styles.closeButton} onPress={() => { setCompanyError(''); setCodeOpen(false); setManualCode(''); }}>
                         <Ionicons name="close" size={28} color={Colors.white[300]} />
                     </TouchableOpacity>
                 </View>
@@ -206,6 +230,12 @@ const styles = StyleSheet.create({
         opacity: 0.8,
         marginBottom: 36,
         lineHeight: 22,
+    },
+    errorText: {
+        color: Colors.red.base,
+        textAlign: 'center',
+        marginTop: 12,
+        marginBottom: 8,
     },
     qrButton: {
         flexDirection: 'row',
