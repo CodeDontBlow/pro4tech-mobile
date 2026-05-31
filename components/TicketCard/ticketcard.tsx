@@ -8,6 +8,8 @@ import React from "react";
 import { Image, Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import styles from "./ticketcard.styles";
 
+export type { TicketStatus };
+
 type Ticket = {
   id: string;
   agent: { name: string; avatar?: string };
