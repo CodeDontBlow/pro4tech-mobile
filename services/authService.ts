@@ -32,7 +32,12 @@ type LoginResponse = {
 };
 
 
-type User = { id: string; name: string; email: string; };
+type User = { 
+  id: string; 
+  name: string; 
+  email: string;
+  role: 'CLIENT' | 'AGENT' | 'ADMIN'; 
+};
 
 async function getName(): Promise<User> {
   const { data } = await api.get<User>('/user/me');
