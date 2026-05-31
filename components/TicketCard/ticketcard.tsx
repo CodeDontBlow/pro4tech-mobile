@@ -1,14 +1,14 @@
 import { globalStyles } from "@/constants/globalStyles";
+import {
+  CLOSED_LIKE_STATUSES,
+  statusLabelMap,
+  type TicketStatus,
+} from "@/constants/ticket-status";
 import React from "react";
 import { Image, Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import styles from "./ticketcard.styles";
 
-export type TicketStatus =
-  | 'TRIAGE'
-  | 'OPENED'
-  | 'ESCALATED'
-  | 'CLOSED'
-  | 'RESOLVED';
+export type { TicketStatus };
 
 type Ticket = {
   id: string;
@@ -23,17 +23,9 @@ type Props = {
   cardStyle?: StyleProp<ViewStyle>;
 };
 
-const statusLabelMap: Record<TicketStatus, string> = {
-  TRIAGE: 'Triagem',
-  OPENED: 'Aberto',
-  ESCALATED: 'Escalado',
-  CLOSED: 'Encerrado',
-  RESOLVED: 'Resolvido',
-};
-
 export default function TicketCard({ ticket, onPress, cardStyle }: Props) {
   const statusLabel = statusLabelMap[ticket.status] ?? ticket.status;
-  const isClosed = ticket.status === 'CLOSED' || ticket.status === 'RESOLVED';
+  const isClosed = CLOSED_LIKE_STATUSES.includes(ticket.status);
   const avatarUri = ticket.agent.avatar?.trim()
     ? ticket.agent.avatar
     : 'https://via.placeholder.com/44';

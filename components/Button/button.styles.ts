@@ -19,6 +19,9 @@ export default StyleSheet.create({
     backgroundColor: Colors.teal[300],
     opacity: 0.6,
   },
+  buttonError: {
+    backgroundColor: Colors.red.base,
+  },
   buttonText: {
     color: Colors.white[300],
     ...globalStyles.buttonText,

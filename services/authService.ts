@@ -57,9 +57,14 @@ export const authService = {
     return data;
   },
 
-  async login(payload: LoginPayload): Promise<void> {
-    const { data } = await api.post<LoginResponse>('/auth/login', payload);
-    await storage.setItem('orbita_token', data.access_token);
+  async login(payload: LoginPayload): Promise<User> {
+  const { data } = await api.post<LoginResponse>('/auth/login', payload);
+
+  await storage.setItem('orbita_token', data.access_token);
+
+  const user = await getName();
+
+  return user;
   },
 
   async logout(): Promise<void> {

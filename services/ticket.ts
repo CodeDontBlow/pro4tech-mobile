@@ -24,13 +24,13 @@ export type TicketResponse = {
   closedAt?: string | null;
   isArchived: boolean;
   deletedAt?: string | null;
-  client?: { id: string; name: string };
+  client?: { id: string; name: string; avatarUrl?: string | null };
   agent?: {
     id: string;
     supportLevel: string;
     user?: { name?: string; avatarUrl?: string };
   };
-  company?: { id: string; name: string };
+  company?: { id: string; name: string; logoUrl?: string | null };
   supportGroup?: { id: string; name: string } | null;
   subject?: { id: string; name: string } | null;
 };
@@ -62,4 +62,18 @@ export const ticketService = {
     });
     return data;
   },
+
+  async assignToMe(
+    ticketId:string
+  ):Promise<TicketResponse>{
+
+    const {data}
+    =
+    await api.patch<TicketResponse>(
+      `/tickets/${ticketId}/assign-self`
+    );
+
+    return data;
+
+  }
 };

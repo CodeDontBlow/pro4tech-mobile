@@ -118,7 +118,12 @@ export default function Register() {
         </Text>
       </Text>
 
-      <Text style={[globalStyles.text2, styles.link]}>Preciso de ajuda</Text>
+      <Text
+        style={[globalStyles.text2, styles.link]}
+        onPress={() => router.push('/auth/help')}
+      >
+        Preciso de ajuda
+      </Text>
     </View>
   );
 }
