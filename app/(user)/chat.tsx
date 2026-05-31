@@ -22,7 +22,7 @@ import {
 import * as DocumentPicker from 'expo-document-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { io, Socket } from 'socket.io-client';
 
 type ChatMessage = {
@@ -69,6 +69,7 @@ export default function Chat() {
   const [messageText, setMessageText] = useState('');
   const [pendingFiles, setPendingFiles] = useState<LocalAttachment[]>([]);
   const [showFilePreview, setShowFilePreview] = useState(false);
+  const [canReopen, setCanReopen] = useState(false);
   const ratingPromptedRef = useRef(false);
 
   const scrollViewRef = useRef<ScrollView>(null);
@@ -90,9 +91,11 @@ export default function Chat() {
         const closedLike = CLOSED_LIKE_STATUSES.includes(
           ticket.status as TicketStatus
         );
+        const reopenable = ticket.status === 'RESOLVED';
 
         setTicketStatus(statusLabel);
         setIsClosed(closedLike);
+        setCanReopen(reopenable);
 
         if (closedLike) {
           stopPolling();
@@ -102,6 +105,7 @@ export default function Chat() {
             setShowRatingModal(true);
           }
         }
+
       }
       if (ticket?.agentId) {
         setAgentLabel(ticket.agent?.user?.name ?? 'Atendente');
@@ -245,6 +249,16 @@ export default function Chat() {
     setShowFilePreview(true);
   };
 
+  const handleReopen = async () => {
+    if (!ticketId) return;
+    try {
+      await api.patch(`/tickets/${ticketId}/reopen`);
+      await fetchTicket();
+    } catch (err: any) {
+      console.error('Erro ao reabrir:', err.response?.data);
+    }
+  };
+
   const handleDelete = () => {
     if (!ticketId || !selectedId) {
       setSelectedId(null);
@@ -275,7 +289,7 @@ export default function Chat() {
       <Header title="ORBITA" showBack showProfile onBack={() => router.replace('/(user)/(tabs)')} />
 
       <View style={styles.ticketInfo}>
-        <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8}}>
+        <View style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Avatar src={agentAvatarUrl ?? undefined} alt="Avatar do atendente" ratio={36} />
 
           <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
@@ -298,7 +312,7 @@ export default function Chat() {
         {triageHistory.map((item, index) => (
           <View key={`triage-${index}`}>
             <View style={styles.messageWrapper}>
-              <Avatar bot={true} alt="Avatar do Orbi" style={{marginBottom: 20}} />
+              <Avatar bot={true} alt="Avatar do Orbi" style={{ marginBottom: 20 }} />
               <SpeechBubble type="bot" text={item.question} time={undefined} />
             </View>
             <SpeechBubble type="user" text={item.answer} time={undefined} />
@@ -317,7 +331,7 @@ export default function Chat() {
                 <Avatar
                   src={agentAvatarUrl ?? undefined}
                   alt="Avatar do atendente"
-                  style={{marginBottom: 20}}
+                  style={{ marginBottom: 20 }}
                 />
               )}
 
@@ -336,8 +350,13 @@ export default function Chat() {
         {isClosed && (
           <View style={styles.closedContainer}>
             <Text style={[globalStyles.label1, styles.closedText]}>
-              Este chamado foi encerrado pelo atendente.
+              {canReopen ? 'Este chamado foi resolvido.' : 'Este chamado foi encerrado.'}
             </Text>
+            {canReopen && (
+              <TouchableOpacity style={styles.reopenButton} onPress={handleReopen}>
+                <Text style={[globalStyles.label1, styles.reopenText]}>Reabrir chamado</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
       </ScrollView>
@@ -432,16 +451,29 @@ const styles = StyleSheet.create({
   messagesContent: {
     paddingVertical: 16,
   },
+
   closedContainer: {
     alignSelf: 'center',
     backgroundColor: Colors.white[500],
     borderRadius: 50,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 64,
+    paddingVertical: 14,
     marginVertical: 12,
   },
   closedText: {
     color: Colors.black[300],
+    textAlign: 'center',
+  },
+  reopenButton: {
+    marginTop: 8,
+    backgroundColor: Colors.teal.base,
+    borderRadius: 20,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+  },
+  reopenText: {
+    color: Colors.white[300],
+    fontWeight: '600',
     textAlign: 'center',
   },
 });
