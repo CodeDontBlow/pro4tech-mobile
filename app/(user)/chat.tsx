@@ -276,7 +276,12 @@ export default function Chat() {
 
       <View style={styles.ticketInfo}>
         <View style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 8}}>
-          <Avatar src={agentAvatarUrl ?? undefined} alt="Avatar do atendente" ratio={36} />
+          <Avatar
+            src={agentAvatarUrl}
+            fallback="orbi"
+            alt="Avatar do atendente"
+            ratio={36}
+          />
 
           <Text style={[globalStyles.text2, styles.agentName]}>{agentLabel}</Text>
         </View>
@@ -315,7 +320,8 @@ export default function Chat() {
 
               {sender !== 'CLIENT' && (
                 <Avatar
-                  src={agentAvatarUrl ?? undefined}
+                  src={agentAvatarUrl}
+                  fallback="orbi"
                   alt="Avatar do atendente"
                   style={{marginBottom: 20}}
                 />
