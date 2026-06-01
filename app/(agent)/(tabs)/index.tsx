@@ -6,11 +6,13 @@ import { router } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Avatar from '../../../components/Avatar/Avatar';
+import { TicketStatus } from '@/constants/ticket-status';
 
 export default function AgentHome() {
   const [tickets, setTickets] = useState<TicketResponse[]>([]);
   const [loading, setLoading] = useState(true);  
   const [user, setUser] = useState({ id: '', name: '' });
+  const activateStatus: TicketStatus[] = ['ESCALATED', 'OPENED', 'TRIAGE', 'REOPENED']
   const orbi = require('../../../assets/logos/orbi-happy.png') as any;
 
   const groups = Array.from(
@@ -38,8 +40,9 @@ export default function AgentHome() {
 
   async function loadTickets() {
     try {
-      const response = await ticketService.list({ status: ['OPENED', 'RESOLVED', 'ESCALATED', 'TRIAGE']});
-      setTickets(response.data);
+      const response = await ticketService.list({ includeArchived: false });
+      const validTickets = response.data.filter(t => activateStatus.includes(t.status))
+      setTickets(validTickets);
     } finally {
       setLoading(false);
     }
@@ -120,7 +123,9 @@ export default function AgentHome() {
                   ticket.agentId !== user.id && styles.cardDisabled,
                 ]}
                 disabled={ticket.agentId !== user.id}
-                onPress={() => ticket.agentId === user.id && router.push({ pathname: '/(agent)/chat' })}
+                onPress={() => ticket.agentId === user.id 
+                  && router.push({ pathname: '/(agent)/chat', params: { ticketId: ticket.id } }) 
+                }
               >
                 <View style={styles.cardContent}>
                   <Avatar
@@ -139,8 +144,8 @@ export default function AgentHome() {
                       <Text style={[globalStyles.label1, styles.sub]}>
                         {ticket.agent?.user?.name ?
                         ticket.agent?.user?.name
-                        : <TouchableOpacity onPress={() => assumeTicket(ticket.id)}>
-                            <Text style={styles.assumeButton}>Assumir chamado</Text>
+                        : <TouchableOpacity onPress={() => assumeTicket(ticket.id)} style={styles.button}>
+                            <Text style={[styles.buttonText, globalStyles.label1]}>Assumir chamado</Text>
                           </TouchableOpacity>}
                       </Text>
 
@@ -252,18 +257,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   button: {
-    backgroundColor: Colors.green.base,
-    paddingHorizontal: 18,
+    backgroundColor: Colors.teal.base,
+    paddingHorizontal: 28,
     paddingVertical: 10,
     borderRadius: 10,
   },
   buttonText: {
     color: Colors.white.base,
-    fontWeight: '600',
-  },
-  assumeButton: {
-    backgroundColor: Colors.green.base,
-    color: Colors.white.base,
-    fontWeight: '600',
-  },
+  }
 });

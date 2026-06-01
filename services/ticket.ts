@@ -36,6 +36,7 @@ export type TicketResponse = {
 };
 
 export type TicketListResponse = {
+  filter(arg0: (t: any) => any): unknown;
   data: TicketResponse[];
   meta: { total: number; page: number; lastPage: number; limit: number };
 };
@@ -44,7 +45,7 @@ export const ticketService = {
   async list(params?: {
     page?: number;
     limit?: number;
-    status?: TicketStatus | TicketStatus[];
+    status?: TicketStatus;
     agentId?: string;
     includeArchived?: boolean;
   }): Promise<TicketListResponse> {
