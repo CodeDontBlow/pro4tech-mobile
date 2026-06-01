@@ -20,8 +20,8 @@ export default function RootLayout() {
     }
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) {  
-    return null;                     
+  if (!fontsLoaded && !fontError) {
+    return null;
   }
 
   return (
