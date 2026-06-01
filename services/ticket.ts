@@ -44,7 +44,8 @@ export const ticketService = {
   async list(params?: {
     page?: number;
     limit?: number;
-    status?: TicketStatus;
+    status?: TicketStatus | TicketStatus[];
+    agentId?: string;
     includeArchived?: boolean;
   }): Promise<TicketListResponse> {
     const { data } = await api.get<TicketListResponse>('/tickets', {
@@ -75,5 +76,19 @@ export const ticketService = {
 
     return data;
 
+  },
+
+  async getGroups(): Promise<{ id: string; name: string }[]> {
+    const { data } = await api.get<{ id: string; name: string }[]>('/support-groups');
+    return data;
+  },
+
+  async ticketByGroup(groupId: string): Promise<TicketResponse[]> {
+    const { data } = await api.get<TicketResponse[]>(`/tickets`, {
+      params: {
+        supportGroupId: groupId,
+      }
+    });
+    return data;
   }
 };
