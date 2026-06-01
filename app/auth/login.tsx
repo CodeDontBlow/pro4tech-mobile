@@ -63,8 +63,6 @@ export default function Login() {
         isError={hasError}
       />
 
-      <Text style={[globalStyles.label2, styles.forgotPassword]}>Esqueci minha senha</Text>
-
       {hasError && (
         <Text style={[globalStyles.label1, styles.errorText]}>
           {errorMessage}
@@ -115,13 +113,6 @@ const styles = StyleSheet.create({
     color: Colors.teal.base,
     textAlign: 'center',
     marginBottom: 32,
-  },
-  forgotPassword: {
-    color: Colors.teal.base,
-    textAlign: 'right',
-    marginTop: -8,
-    marginBottom: 18,
-    fontWeight: 'bold',
   },
   errorText: {
     color: Colors.red.base,

@@ -8,7 +8,7 @@ export default function AgentTabsLayout() {
     <Tabs
       tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
-        header: () => <Header title="ORBITA" showProfile={false} />,
+        header: () => <Header title="ORBITA" showProfile />,
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Index' }} />

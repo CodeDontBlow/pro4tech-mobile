@@ -33,7 +33,6 @@ export default function Profile() {
     companyId: '',
     companyName: '',
   });
-  const [notifications, setNotifications] = useState(true);
   const [photo, setPhoto] = useState<string | null>(null);
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
 
@@ -156,26 +155,9 @@ export default function Profile() {
             <Text style={[globalStyles.text1, styles.infoLabel]}>Senha:</Text>
             <View style={styles.passwordRow}>
               <Text style={[globalStyles.text1, styles.infoValue]}>••••••••••</Text>
-              <TouchableOpacity style={styles.editButton}>
-                <Ionicons name="create-outline" size={16} color={Colors.teal.base} />
-                <Text style={[globalStyles.label1, styles.editText]}>Alterar</Text>
-              </TouchableOpacity>
             </View>
           </View>
-        </View>
-
-        <Text style={[globalStyles.title2, styles.sectionTitle]}>Configurações</Text>
-        <View style={styles.card}>
-          <View style={styles.settingRow}>
-            <Text style={[globalStyles.text1, styles.settingLabel]}>Notificações</Text>
-            <Switch
-              value={notifications}
-              onValueChange={setNotifications}
-              trackColor={{ false: Colors.white[500], true: Colors.teal.base }}
-              thumbColor={Colors.white[300]}
-            />
-          </View>
-          <View style={styles.divider} />
+           <View style={styles.divider} />
           <View style={styles.settingRow}>
             <Text style={[globalStyles.text1, styles.settingLabel]}>Sobre o ORBITA</Text>
             <Text style={[globalStyles.label1, styles.infoValue]}>v1.0.0 - Code Don't Blow</Text>

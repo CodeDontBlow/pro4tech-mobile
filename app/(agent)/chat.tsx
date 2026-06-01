@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, TextInput, } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { io, Socket } from 'socket.io-client';
 import Header from '@/components/Header/Header';
@@ -51,13 +51,35 @@ export default function AgentChat() {
   const [isClosed, setIsClosed] = useState(false);
   const [authToken, setAuthToken] = useState<string | null>(null);
   const [messageText, setMessageText] = useState('');
-
+  const [showEscalateModal, setShowEscalateModal] = useState(false);
+  const [supportGroups, setSupportGroups] = useState<any[]>([]);
+  const [escalationMode, setEscalationMode] = useState<'GROUP' | 'LEVEL'>('GROUP');
+  const [supportGroupId, setSupportGroupId] = useState('');
+  const [supportLevel, setSupportLevel] = useState('');
+  const [escalateComment, setEscalateComment] = useState('');
   const socketRef = useRef<Socket | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     authService.getToken().then(setAuthToken);
+  }, []);
+
+  useEffect(() => {
+    async function loadSupportGroups() {
+      try {
+        const response = await api.get('/support-group', {
+          params: {
+            page: 1, limit: 100,
+          },
+        });
+
+        setSupportGroups(response.data.data ?? []);
+      } catch (error) {
+        console.log('Erro ao buscar grupos:', error);
+      }
+    }
+    loadSupportGroups();
   }, []);
 
   async function loadTicket() {
@@ -68,7 +90,10 @@ export default function AgentChat() {
       setTicket(response.data);
       setTicketStatus(response.data.status);
 
-      if (response.data.status === 'CLOSED') {
+      if (
+        response.data.status === 'CLOSED' ||
+        response.data.status === 'RESOLVED'
+      ) {
         setIsClosed(true);
       }
     } catch (err) {
@@ -112,13 +137,17 @@ export default function AgentChat() {
 
     socket.on('updatedMessage', (message) => {
       setMessages((prev) =>
-        prev.map((item) => (item.id === message.id ? message : item))
+        prev.map((item) =>
+          item.id === message.id ? message : item
+        )
       );
     });
 
     socket.on('deletedMessage', (message) => {
       setMessages((prev) =>
-        prev.map((item) => (item.id === message.id ? message : item))
+        prev.map((item) =>
+          item.id === message.id ? message : item
+        )
       );
     });
 
@@ -130,14 +159,17 @@ export default function AgentChat() {
 
   useEffect(() => {
     setTimeout(() => {
-      scrollViewRef.current?.scrollToEnd({ animated: true });
+      scrollViewRef.current?.scrollToEnd({
+        animated: true,
+      });
     }, 100);
   }, [messages]);
 
   const orderedMessages = useMemo(() => {
     return [...messages].sort(
       (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        new Date(a.createdAt).getTime() -
+        new Date(b.createdAt).getTime()
     );
   }, [messages]);
 
@@ -156,7 +188,9 @@ export default function AgentChat() {
     try {
       if (!ticketId) return;
 
-      await api.patch(`/tickets/${ticketId}`, { status: 'CLOSED' });
+      await api.patch(`/tickets/${ticketId}`, {
+        status: 'CLOSED',
+      });
 
       setTicketStatus('CLOSED');
       setIsClosed(true);
@@ -171,7 +205,44 @@ export default function AgentChat() {
         pollingRef.current = null;
       }
     } catch (error: any) {
-      console.log('Erro ao encerrar ticket:', error.response?.data ?? error);
+      console.log(
+        'Erro ao encerrar ticket:',
+        error.response?.data ?? error
+      );
+    }
+  }
+
+  async function escalateTicket() {
+    try {
+      if (!ticketId) return;
+
+      const payload = {
+        targetGroupId:
+          escalationMode === 'GROUP'
+            ? supportGroupId || undefined
+            : undefined,
+
+        targetSupportLevel:
+          escalationMode === 'LEVEL'
+            ? supportLevel || undefined
+            : undefined,
+
+        comment: escalateComment,
+      };
+
+      await api.patch(
+        `/tickets/${ticketId}/escalate`,
+        payload
+      );
+
+      setShowEscalateModal(false);
+
+      router.back();
+    } catch (error: any) {
+      console.log(
+        'Erro ao escalar:',
+        error.response?.data ?? error
+      );
     }
   }
 
@@ -187,13 +258,19 @@ export default function AgentChat() {
       <View style={styles.ticketInfo}>
         <View style={styles.ticketTitleGroup}>
           <Avatar
-            src={ticket?.client?.avatarUrl ?? ticket?.company?.logoUrl}
+            src={
+              ticket?.client?.avatarUrl ??
+              ticket?.company?.logoUrl
+            }
             alt="Avatar do cliente"
             ratio={36}
           />
           <Text
             numberOfLines={1}
-            style={[globalStyles.text2, styles.ticketTitle]}
+            style={[
+              globalStyles.text2,
+              styles.ticketTitle,
+            ]}
           >
             {ticket?.client?.name ?? 'Cliente'}
             {' - '}
@@ -202,13 +279,25 @@ export default function AgentChat() {
         </View>
 
         {!isClosed ? (
-          <Button
-            label="Encerrar"
-            variant="error"
-            onPress={closeTicket}
-            style={styles.closeButton}
-            textStyle={styles.closeButtonText}
-          />
+          <View style={styles.actionsContainer}>
+            <Button
+              label="Escalonar"
+              variant="primary"
+              onPress={() =>
+                setShowEscalateModal(true)
+              }
+              style={styles.escalateButton}
+              textStyle={styles.closeButtonText}
+            />
+
+            <Button
+              label="Encerrar"
+              variant="error"
+              onPress={closeTicket}
+              style={styles.closeButton}
+              textStyle={styles.closeButtonText}
+            />
+          </View>
         ) : (
           <Button
             label="Encerrado"
@@ -226,19 +315,31 @@ export default function AgentChat() {
         style={styles.messages}
         showsVerticalScrollIndicator={false}
       >
-        <DateSeparator label={new Date().toLocaleDateString('pt-BR')} />
+        <DateSeparator
+          label={new Date().toLocaleDateString(
+            'pt-BR'
+          )}
+        />
 
         {orderedMessages.map((message) => {
-          const fromClient = message.senderRole === 'CLIENT';
+          const fromClient =
+            message.senderRole === 'CLIENT';
 
           return (
             <View
               key={message.id}
-              style={fromClient ? styles.messageWrapper : undefined}
+              style={
+                fromClient
+                  ? styles.messageWrapper
+                  : undefined
+              }
             >
               {fromClient && (
                 <Avatar
-                  src={ticket?.client?.avatarUrl ?? ticket?.company?.logoUrl}
+                  src={
+                    ticket?.client?.avatarUrl ??
+                    ticket?.company?.logoUrl
+                  }
                   alt="Avatar do cliente"
                   style={{ marginBottom: 20 }}
                 />
@@ -246,9 +347,15 @@ export default function AgentChat() {
 
               <SpeechBubble
                 type={fromClient ? 'bot' : 'user'}
-                text={message.deletedAt ? 'Mensagem removida' : message.content ?? ''}
+                text={
+                  message.deletedAt
+                    ? 'Mensagem removida'
+                    : message.content ?? ''
+                }
                 attachments={message.attachments}
-                time={formatTime(message.createdAt)}
+                time={formatTime(
+                  message.createdAt
+                )}
               />
             </View>
           );
@@ -262,6 +369,72 @@ export default function AgentChat() {
           onSend={handleSend}
         />
       )}
+
+      <Modal
+        visible={showEscalateModal}
+        transparent
+        animationType="fade"
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>
+              Escalonar Chamado
+            </Text>
+
+            <View style={styles.switchContainer}>
+              <TouchableOpacity
+                style={[
+                  styles.switchButton,
+                  escalationMode === 'GROUP' &&
+                    styles.switchButtonActive,
+                ]}
+                onPress={() =>
+                  setEscalationMode('GROUP')
+                }
+              >
+                <Text>Grupo</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[
+                  styles.switchButton,
+                  escalationMode === 'LEVEL' &&
+                    styles.switchButtonActive,
+                ]}
+                onPress={() =>
+                  setEscalationMode('LEVEL')
+                }
+              >
+                <Text>Nível</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TextInput
+              placeholder="Motivo do escalonamento..."
+              multiline
+              value={escalateComment}
+              placeholderTextColor={Colors.black[300]}
+              onChangeText={setEscalateComment}
+              style={styles.commentInput}
+            />
+
+            <View style={styles.modalButtons}>
+              <Button
+                label="Cancelar"
+                variant="error"
+                onPress={() =>
+                  setShowEscalateModal(false)
+                }
+              />
+
+              <Button
+                label="Confirmar"
+                onPress={escalateTicket}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -296,7 +469,16 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     gap: 12,
   },
+  actionsContainer: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   closeButton: {
+    width: 95,
+    height: 32,
+    justifyContent: 'center',
+  },
+  escalateButton: {
     width: 95,
     height: 32,
     justifyContent: 'center',
@@ -313,5 +495,49 @@ const styles = StyleSheet.create({
   messages: {
     flex: 1,
     paddingHorizontal: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: Colors.black.base,
+    justifyContent: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: Colors.white.base,
+    borderRadius: 16,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  switchButton: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: Colors.white[500],
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  switchButtonActive: {
+    backgroundColor: Colors.teal[300],
+  },
+  commentInput: {
+    borderWidth: 1,
+    borderColor: Colors.white[700],
+    borderRadius: 8,
+    minHeight: 100,
+    padding: 12,
+    textAlignVertical: 'top',
+  },
+  modalButtons: {
+    justifyContent: 'space-between',
+    marginTop: 20,
   },
 });
