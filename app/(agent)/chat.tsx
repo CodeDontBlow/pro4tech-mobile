@@ -38,6 +38,25 @@ const formatTime = (value?: string) => {
   });
 };
 
+const SUPPORT_LEVELS = [
+  { label: 'Nível 1', value: 'LEVEL_1' },
+  { label: 'Nível 2', value: 'LEVEL_2' },
+  { label: 'Nível 3', value: 'LEVEL_3' },
+] as const;
+
+const getSupportLevelLabel = (level?: string) => {
+  switch (level) {
+    case 'LEVEL_1':
+      return 'Nível 1';
+    case 'LEVEL_2':
+      return 'Nível 2';
+    case 'LEVEL_3':
+      return 'Nível 3';
+    default:
+      return 'Nível';
+  }
+};
+
 export default function AgentChat() {
   const params = useLocalSearchParams<{ ticketId?: string | string[] }>();
 
@@ -68,13 +87,14 @@ export default function AgentChat() {
   useEffect(() => {
     async function loadSupportGroups() {
       try {
-        const response = await api.get('/support-group', {
+        const response = await api.get('/support-groups', {
           params: {
-            page: 1, limit: 100,
+            page: 1,
+            limit: 100,
           },
         });
 
-        setSupportGroups(response.data.data ?? []);
+        setSupportGroups(response.data.data ?? response.data ?? []);
       } catch (error) {
         console.log('Erro ao buscar grupos:', error);
       }
@@ -113,6 +133,15 @@ export default function AgentChat() {
       }
     };
   }, [ticketId]);
+
+  useEffect(() => {
+    if (!showEscalateModal) return;
+
+
+    setSupportGroupId(ticket?.supportGroupId ?? '');
+    setSupportLevel(ticket?.supportLevel ?? 'LEVEL_1');
+    setEscalateComment('');
+  }, [showEscalateModal]);
 
   useEffect(() => {
     if (!ticketId || !authToken) return;
@@ -173,6 +202,12 @@ export default function AgentChat() {
     );
   }, [messages]);
 
+  const canConfirmEscalation =
+    escalateComment.trim().length > 0 &&
+    (escalationMode === 'LEVEL'
+      ? supportLevel.length > 0
+      : supportGroupId.length > 0);
+
   function handleSend() {
     if (!ticketId || !messageText.trim() || isClosed) return;
 
@@ -215,6 +250,7 @@ export default function AgentChat() {
   async function escalateTicket() {
     try {
       if (!ticketId) return;
+      if (!escalateComment.trim()) return;
 
       const payload = {
         targetGroupId:
@@ -225,18 +261,14 @@ export default function AgentChat() {
         targetSupportLevel:
           escalationMode === 'LEVEL'
             ? supportLevel || undefined
-            : undefined,
+            : (ticket?.supportLevel ?? supportLevel) || undefined,
 
-        comment: escalateComment,
+        comment: escalateComment.trim(),
       };
 
-      await api.patch(
-        `/tickets/${ticketId}/escalate`,
-        payload
-      );
+      await api.patch(`/tickets/${ticketId}/escalate`, payload);
 
       setShowEscalateModal(false);
-
       router.back();
     } catch (error: any) {
       console.log(
@@ -388,9 +420,7 @@ export default function AgentChat() {
                   escalationMode === 'GROUP' &&
                     styles.switchButtonActive,
                 ]}
-                onPress={() =>
-                  setEscalationMode('GROUP')
-                }
+                onPress={() => setEscalationMode('GROUP')}
               >
                 <Text>Grupo</Text>
               </TouchableOpacity>
@@ -401,13 +431,81 @@ export default function AgentChat() {
                   escalationMode === 'LEVEL' &&
                     styles.switchButtonActive,
                 ]}
-                onPress={() =>
-                  setEscalationMode('LEVEL')
-                }
+                onPress={() => setEscalationMode('LEVEL')}
               >
                 <Text>Nível</Text>
               </TouchableOpacity>
             </View>
+
+            {escalationMode === 'GROUP' ? (
+              <View style={styles.selectionSection}>
+                <Text style={styles.selectionTitle}>
+                  Escolha o grupo de suporte
+                </Text>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.groupList}
+                >
+                  {supportGroups.length > 0 ? (
+                    supportGroups.map((group) => (
+                      <TouchableOpacity
+                        key={group.id}
+                        style={[
+                          styles.groupItem,
+                          supportGroupId === group.id &&
+                            styles.groupItemActive,
+                        ]}
+                        onPress={() => setSupportGroupId(group.id)}
+                      >
+                        <Text
+                          style={[
+                            styles.groupItemText,
+                            supportGroupId === group.id &&
+                              styles.groupItemTextActive,
+                          ]}
+                        >
+                          {group.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))
+                  ) : (
+                    <Text style={styles.emptyText}>
+                      Nenhum grupo disponível.
+                    </Text>
+                  )}
+                </ScrollView>
+              </View>
+            ) : (
+              <View style={styles.selectionSection}>
+                <Text style={styles.selectionTitle}>
+                  Escolha o nível de suporte
+                </Text>
+                <View style={styles.levelList}>
+                  {SUPPORT_LEVELS.map((level) => (
+                    <TouchableOpacity
+                      key={level.value}
+                      style={[
+                        styles.levelItem,
+                        supportLevel === level.value &&
+                          styles.levelItemActive,
+                      ]}
+                      onPress={() => setSupportLevel(level.value)}
+                    >
+                      <Text
+                        style={[
+                          styles.levelItemText,
+                          supportLevel === level.value &&
+                            styles.levelItemTextActive,
+                        ]}
+                      >
+                        {level.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
 
             <TextInput
               placeholder="Motivo do escalonamento..."
@@ -430,6 +528,7 @@ export default function AgentChat() {
               <Button
                 label="Confirmar"
                 onPress={escalateTicket}
+                disabled={!canConfirmEscalation}
               />
             </View>
           </View>
@@ -527,6 +626,62 @@ const styles = StyleSheet.create({
   },
   switchButtonActive: {
     backgroundColor: Colors.teal[300],
+  },
+  selectionSection: {
+    marginBottom: 16,
+  },
+  selectionTitle: {
+    marginBottom: 12,
+    color: Colors.black.base,
+    fontWeight: '600',
+  },
+  groupList: {
+    gap: 8,
+  },
+  groupItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    backgroundColor: Colors.white[300],
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: Colors.white[700],
+  },
+  groupItemActive: {
+    backgroundColor: Colors.teal.base,
+    borderColor: Colors.teal[700],
+  },
+  groupItemText: {
+    color: Colors.black.base,
+  },
+  groupItemTextActive: {
+    color: Colors.white.base,
+    fontWeight: '700',
+  },
+  levelList: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  levelItem: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: Colors.white[500],
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  levelItemActive: {
+    backgroundColor: Colors.teal.base,
+    borderColor: Colors.teal[700],
+  },
+  levelItemText: {
+    color: Colors.black.base,
+  },
+  levelItemTextActive: {
+    color: Colors.white.base,
+    fontWeight: '700',
+  },
+  emptyText: {
+    color: Colors.black[300],
   },
   commentInput: {
     borderWidth: 1,
