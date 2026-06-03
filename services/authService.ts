@@ -9,6 +9,12 @@ type RegisterPayload = {
   role: 'CLIENT' | 'AGENT' | 'ADMIN';
 };
 
+type Company = {
+  id: string;
+  name: string;
+  logoUrl?: string;
+};
+
 type RegisterResponse = {
   id: string;
   name: string;
@@ -25,20 +31,27 @@ type LoginResponse = {
   access_token: string;
 };
 
-type User = {
-  id: string;
-  name: string;
+
+type User = { 
+  id: string; 
+  name: string; 
   email: string;
-  role: 'CLIENT' | 'AGENT' | 'ADMIN';
+  role: 'CLIENT' | 'AGENT' | 'ADMIN'; 
 };
-  
+
 async function getName(): Promise<User> {
   const { data } = await api.get<User>('/user/me');
-  return data;    
+  return data;
 }
 
 
 export const authService = {
+
+  async getCompanyByCode(code: string) {
+    const { data } = await api.get(`/company/lookup/${code}`);
+    return data;
+  },
+
   async register(payload: RegisterPayload): Promise<RegisterResponse> {
     const { data } = await api.post<RegisterResponse>('/user', payload);
     return data;
@@ -63,6 +76,5 @@ export const authService = {
   },
 
   getName,
- 
 
 };

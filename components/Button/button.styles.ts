@@ -1,11 +1,11 @@
+import { globalStyles } from '@/constants/globalStyles';
 import { StyleSheet } from 'react-native';
 import Colors from '../../constants/colors';
-import { globalStyles } from '@/constants/globalStyles';
 
 export default StyleSheet.create({
   button: {
     backgroundColor: Colors.teal.base,
-    borderRadius: 50,
+    borderRadius: 15,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
@@ -24,7 +24,7 @@ export default StyleSheet.create({
   },
   buttonText: {
     color: Colors.white[300],
-    ...globalStyles.subtitle2,
+    ...globalStyles.buttonText,
   },
   buttonTextLight: {
     color: Colors.teal.base,
