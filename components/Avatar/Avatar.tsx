@@ -21,6 +21,6 @@ export default function Avatar({ src, alt, style, ratio = 32, bot }: AvatarProps
   const final = getAvatarUrl(src, bot);
 
   return (
-        <Image source={final} alt={alt} style={[{ width: ratio, height: ratio, borderRadius: 9999}, style]} />
+    <Image source={final} alt={alt} style={[{ width: ratio, height: ratio, borderRadius: 9999}, style]} />
   );
 }

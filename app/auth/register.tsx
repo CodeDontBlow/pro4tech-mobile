@@ -8,8 +8,6 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-//const TEMP_COMPANY_ID = '019d6787-42ea-7dd1-a8fe-c61c3732c082';
-
 export default function Register() {
   const { companyId, companyName } = useLocalSearchParams<{
     companyId: string;
@@ -46,7 +44,7 @@ export default function Register() {
         name,
         email,
         password,
-        companyId,  // já é o UUID
+        companyId,
         role: 'CLIENT',
       });
 
