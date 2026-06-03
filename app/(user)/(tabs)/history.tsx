@@ -1,17 +1,26 @@
-import TicketCard, { TicketStatus } from '@/components/TicketCard/ticketcard';
+import TicketCard from '@/components/TicketCard/ticketcard';
+import { Filter } from '@/components/Filter/filter';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import { type TicketStatus } from '@/constants/ticket-status';
 import { TicketResponse, ticketService } from '@/services/ticket';
-import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import React, { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 type Ticket = {
   id: string;
   agent: { name: string; avatar?: string };
   lastMessage: string;
   status: TicketStatus;
+  createdAt: Date;
 };
 
 const getAgentName = (ticket: TicketResponse) =>
@@ -28,12 +37,59 @@ const toCardTicket = (ticket: TicketResponse): Ticket => ({
   },
   lastMessage: 'Última mensagem',
   status: ticket.status,
+  createdAt: new Date(ticket.createdAt),
 });
+
+const statusOptions = [
+  { label: 'Todos os status', value: 'all' },
+  { label: 'Triagem', value: 'TRIAGE' },
+  { label: 'Aberto', value: 'OPENED' },
+  { label: 'Resolvido', value: 'RESOLVED' },
+  { label: 'Encerrado', value: 'CLOSED' },
+];
+
+const monthOptions = [
+  { label: 'Jan', value: '01' },
+  { label: 'Fev', value: '02' },
+  { label: 'Mar', value: '03' },
+  { label: 'Abr', value: '04' },
+  { label: 'Mai', value: '05' },
+  { label: 'Jun', value: '06' },
+  { label: 'Jul', value: '07' },
+  { label: 'Ago', value: '08' },
+  { label: 'Set', value: '09' },
+  { label: 'Out', value: '10' },
+  { label: 'Nov', value: '11' },
+  { label: 'Dez', value: '12' },
+];
+
+const yearOptions = [
+  { label: '2024', value: '2024' },
+  { label: '2025', value: '2025' },
+  { label: '2026', value: '2026' },
+];
 
 export default function History() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [status, setStatus] = useState('all');
+  const [openFilter, setOpenFilter] = useState<'status' | 'month' | 'year' | null>(null);
+
+  const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+  const currentYear = String(new Date().getFullYear());
+
+  const [month, setMonth] = useState(currentMonth);
+  const [year, setYear] = useState(currentYear);
+
+  const filteredTickets = useMemo(() => {
+    return tickets.filter((ticket: Ticket) => {
+      const matchStatus = status === 'all' || ticket.status === status;
+      const matchMonth = String(ticket.createdAt.getMonth() + 1).padStart(2, '0') === month;
+      const matchYear = String(ticket.createdAt.getFullYear()) === year;
+      return matchStatus && matchMonth && matchYear;
+    });
+  }, [tickets, status, month, year]);
 
   const loadTickets = useCallback(async () => {
     setError(null);
@@ -53,6 +109,15 @@ export default function History() {
 
   return (
     <View style={styles.container}>
+
+      {/* Backdrop global — fecha qualquer filtro ao tocar fora */}
+      {openFilter !== null && (
+        <Pressable
+          style={StyleSheet.absoluteFillObject}
+          onPress={() => setOpenFilter(null)}
+        />
+      )}
+
       <View style={styles.titleContainer}>
         <Text style={[globalStyles.title2, styles.title]}>
           Histórico de Chamados
@@ -60,8 +125,36 @@ export default function History() {
       </View>
 
       <View style={styles.filterContainer}>
-        <Ionicons name="calendar-outline" size={20} color={Colors.teal[500]} />
-        <Text style={styles.filterText}>05/05/2026</Text>
+        <View style={{ flex: 2 }}>
+          <Filter
+            isOpen={openFilter === 'status'}
+            onToggle={() => setOpenFilter(openFilter === 'status' ? null : 'status')}
+            onClose={() => setOpenFilter(null)}
+            options={statusOptions}
+            defaultValue="all"
+            onChange={(o) => setStatus(o.value)}
+          />
+        </View>
+        <View style={{ flex: 1, minWidth: 80 }}>
+          <Filter
+            isOpen={openFilter === 'month'}
+            onToggle={() => setOpenFilter(openFilter === 'month' ? null : 'month')}
+            onClose={() => setOpenFilter(null)}
+            options={monthOptions}
+            defaultValue={currentMonth}
+            onChange={(o) => setMonth(o.value)}
+          />
+        </View>
+        <View style={{ flex: 1, minWidth: 72 }}>
+          <Filter
+            isOpen={openFilter === 'year'}
+            onToggle={() => setOpenFilter(openFilter === 'year' ? null : 'year')}
+            onClose={() => setOpenFilter(null)}
+            options={yearOptions}
+            defaultValue={currentYear}
+            onChange={(o) => setYear(o.value)}
+          />
+        </View>
       </View>
 
       <View style={styles.ticketsContainer}>
@@ -70,19 +163,22 @@ export default function History() {
         ) : error ? (
           <Text style={styles.errorText}>{error}</Text>
         ) : (
-          <FlatList
-            data={tickets}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TicketCard
-                ticket={item}
-                onPress={(id) => router.push({ pathname: '/chat', params: { ticketId: id } })}
+          <>
+            {filteredTickets.length === 0 ? (
+              <Text style={styles.emptyText}>Nenhum chamado encontrado.</Text>
+            ) : (
+              <FlatList
+                data={filteredTickets}
+                keyExtractor={(item) => item.id}
+                renderItem={({ item }) => (
+                  <TicketCard
+                    ticket={item}
+                    onPress={(id) => router.push({ pathname: '/chat', params: { ticketId: id } })}
+                  />
+                )}
               />
             )}
-            ListEmptyComponent={
-              <Text style={[globalStyles.text2, styles.emptyText, styles.description]}>Nenhum chamado encontrado</Text>
-            }
-          />
+          </>
         )}
       </View>
     </View>
@@ -105,29 +201,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   filterContainer: {
-    marginHorizontal: 16,
-    marginBottom: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: Colors.teal[500],
-    backgroundColor: Colors.white[300],
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 8,
-    alignSelf: 'flex-end',
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    zIndex: 10,
   },
-
   ticketsContainer: {
     flex: 1,
     paddingHorizontal: 32,
-  },
-
-  filterText: {
-    color: Colors.teal[700],
-    fontSize: 14,
-    fontFamily: globalStyles.text2.fontFamily,
   },
   errorText: {
     color: Colors.red.base,
