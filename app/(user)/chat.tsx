@@ -143,10 +143,10 @@ export default function Chat() {
   useEffect(() => {
     if (!ticketId || !authToken) return;
 
-    const baseUrl = api.defaults.baseURL;
+    const baseUrl = api.defaults.baseURL?.replace('/api', '');
     if (!baseUrl) return;
 
-    const socket = io(`${baseUrl}/chat`, {
+    const socket = io(`${baseUrl}/ws`, {
       auth: { token: authToken },
     });
 
