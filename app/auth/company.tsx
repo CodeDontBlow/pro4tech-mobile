@@ -10,13 +10,16 @@ import React, { useState } from 'react';
 import {
     Alert,
     Modal,
-    StyleSheet, Text,
+    StyleSheet,
+    Text,
     TextInput,
     TouchableOpacity,
     View,
 } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function CompanyCode() {
+    const insets = useSafeAreaInsets();
     const [codeError, setCodeError] = useState('');
     const [manualCode, setManualCode] = useState('');
     const [cameraOpen, setCameraOpen] = useState(false);
@@ -90,7 +93,7 @@ export default function CompanyCode() {
         setCameraOpen(true);
     };
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}> 
             <OrbiAvatar variant="elipse" size={180} />
             <Text style={[globalStyles.title2, styles.title]}>Identificar Empresa</Text>
             <Text style={[globalStyles.text1, styles.description]}>
@@ -204,7 +207,7 @@ export default function CompanyCode() {
                     </TouchableOpacity>
                 </View>
             </Modal>
-        </View>
+</SafeAreaView>
     );
 }
 

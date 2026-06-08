@@ -9,20 +9,21 @@ import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import {
-  CLOSED_LIKE_STATUSES,
-  statusLabelMap,
-  type TicketStatus,
+    CLOSED_LIKE_STATUSES,
+    statusLabelMap,
+    type TicketStatus,
 } from '@/constants/ticket-status';
 import api from '@/services/api';
 import { authService } from '@/services/authService';
 import {
-  LocalAttachment,
-  uploadChatAttachments,
+    LocalAttachment,
+    uploadChatAttachments,
 } from '@/services/upload';
 import * as DocumentPicker from 'expo-document-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { io, Socket } from 'socket.io-client';
 
 type ChatMessage = {
@@ -54,6 +55,8 @@ const formatTime = (value?: string) => {
 };
 
 export default function Chat() {
+  const insets = useSafeAreaInsets();
+
   console.log('CHAT CARREGADO');
   console.log('BASE URL', api.defaults.baseURL);
   const params = useLocalSearchParams<{ ticketId?: string | string[] }>();
@@ -313,7 +316,7 @@ export default function Chat() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <Header title="ORBITA" showBack showProfile onBack={() => router.replace('/(user)/(tabs)')} />
 
       <View style={styles.ticketInfo}>
@@ -332,7 +335,7 @@ export default function Chat() {
       <ScrollView
         ref={scrollViewRef}
         style={styles.messages}
-        contentContainerStyle={styles.messagesContent}
+        contentContainerStyle={[styles.messagesContent, { paddingBottom: insets.bottom + 16 }]}
         showsVerticalScrollIndicator={false}
       >
         <DateSeparator label={new Date().toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })} />

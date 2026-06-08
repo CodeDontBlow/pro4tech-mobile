@@ -11,6 +11,7 @@ import { authService } from '@/services/authService';
 import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { io, Socket } from 'socket.io-client';
 
 type ChatMessage = {
@@ -58,6 +59,7 @@ const getSupportLevelLabel = (level?: string) => {
 };
 
 export default function AgentChat() {
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ ticketId?: string | string[] }>();
 
   const ticketId = Array.isArray(params.ticketId)
@@ -281,7 +283,7 @@ export default function AgentChat() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}>
       <Header
         title="ORBITA"
         showBack
@@ -347,6 +349,7 @@ export default function AgentChat() {
       <ScrollView
         ref={scrollViewRef}
         style={styles.messages}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 16 }}
         showsVerticalScrollIndicator={false}
       >
         <DateSeparator

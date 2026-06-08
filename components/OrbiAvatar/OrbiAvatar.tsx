@@ -1,5 +1,7 @@
+import { Asset } from 'expo-asset';
 import React from 'react';
 import { Image, View } from 'react-native';
+import { SvgUri } from 'react-native-svg';
 import styles from './orbiAvatar.styles';
 
 type Variant = 'default' | 'sleep' | 'elipse' | 'camera' | 'white' | 'angry' | 'bored' | 'neutral' | 'happy' | 'love';
@@ -8,6 +10,8 @@ type Props = {
   variant?: Variant;
   size?: number;
 };
+
+const SVG_VARIANTS: Variant[] = ['elipse', 'camera', 'white'];
 
 const IMAGES = {
   default: require('@/assets/logos/Orbi.png'),
@@ -25,11 +29,19 @@ const IMAGES = {
 export default function OrbiAvatar({ variant = 'default', size = 120 }: Props) {
   return (
     <View style={styles.container}>
-      <Image
-        source={IMAGES[variant]}
-        style={{ width: size, height: size }}
-        resizeMode="contain"
-      />
+      {SVG_VARIANTS.includes(variant) ? (
+        <SvgUri
+          width={size}
+          height={size}
+          uri={Asset.fromModule(IMAGES[variant]).uri}
+        />
+      ) : (
+        <Image
+          source={IMAGES[variant]}
+          style={{ width: size, height: size }}
+          resizeMode="contain"
+        />
+      )}
     </View>
   );
 }

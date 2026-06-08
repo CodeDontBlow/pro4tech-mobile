@@ -7,16 +7,19 @@ import { router } from 'expo-router';
 import Updates from 'expo-updates';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function Welcome() {
+  const insets = useSafeAreaInsets();
+
   console.log('API URL =', process.env.EXPO_PUBLIC_API_URL_ANDROID);
   console.log('BASE URL =', api.defaults.baseURL);
   console.log('Updates object', Updates);
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom }]}> 
       <OrbiAvatar variant="elipse" size={180} />
 
-      <Text style={[globalStyles.title2, styles.welcome]}>Bem-vindo ao</Text>
+      <Text style={[globalStyles.subtitle, styles.welcome]}>Bem-vindo ao</Text>
       <Text style={[globalStyles.title2, styles.orbitaTitle]}>ORBITA</Text>
 
       <Text style={[globalStyles.text1, styles.description]}>
@@ -35,7 +38,7 @@ export default function Welcome() {
           </Text>
         </Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -62,7 +65,7 @@ const styles = StyleSheet.create({
     color: Colors.white.base,
     textAlign: 'center',
     marginBottom: 20,
-    fontSize: 90,
+    fontSize: 75,
     fontWeight: '900',
   },
   description: {
