@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "Orbitaobile",
+    "name": "Orbita",
     "slug": "OrbitaMobile",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/Orbi.png",
     "scheme": "orbitamobile",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -18,10 +18,8 @@
     "android": {
       "usesCleartextTraffic": true,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#F5F5F7",
+        "foregroundImage": "./assets/images/Orbi.png"
       },
       "predictiveBackGestureEnabled": false,
       "package": "com.anonymous.OrbitaMobile"
