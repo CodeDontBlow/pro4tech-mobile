@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "OrbitaMobile",
+    "name": "Orbitaobile",
     "slug": "OrbitaMobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -34,13 +34,13 @@
       "expo-router",
       [
         "expo-build-properties",
-          {
-            "android": {
-              "usesCleartextTraffic": true
-            }
+        {
+          "android": {
+            "usesCleartextTraffic": true
           }
-        ],
-        [
+        }
+      ],
+      [
         "expo-splash-screen",
         {
           "backgroundColor": "#208AEF",
@@ -70,6 +70,7 @@
       "url": "https://u.expo.dev/e169cc32-c607-4505-a788-8f5c3d820011",
       "enabled": true,
       "checkAutomatically": "ON_LOAD"
-    }
+    },
+    "owner": "codedontblow"
   }
 }

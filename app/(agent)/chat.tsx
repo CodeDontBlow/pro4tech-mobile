@@ -1,17 +1,17 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Modal, TextInput, } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
-import { io, Socket } from 'socket.io-client';
-import Header from '@/components/Header/Header';
+import Avatar from '@/components/Avatar/Avatar';
 import Button from '@/components/Button/Button';
 import ChatInput from '@/components/ChatInput/ChatInput';
 import DateSeparator from '@/components/DateSeparator/DateSeparator';
+import Header from '@/components/Header/Header';
 import SpeechBubble from '@/components/SpeechBubble/SpeechBubble';
-import Avatar from '@/components/Avatar/Avatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
 import api from '@/services/api';
 import { authService } from '@/services/authService';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
+import { io, Socket } from 'socket.io-client';
 
 type ChatMessage = {
   id: string;
@@ -146,9 +146,11 @@ export default function AgentChat() {
   useEffect(() => {
     if (!ticketId || !authToken) return;
 
-    const socket = io(`${api.defaults.baseURL}/chat`, {
+    const socket = io(`${api.defaults.baseURL}/ws`, {
+      path: '/socket.io',
       auth: { token: authToken },
-    });
+      transports: ['websocket', 'polling'],
+    }); 
 
     socketRef.current = socket;
 

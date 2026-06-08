@@ -54,6 +54,8 @@ const formatTime = (value?: string) => {
 };
 
 export default function Chat() {
+  console.log('CHAT CARREGADO');
+  console.log('BASE URL', api.defaults.baseURL);
   const params = useLocalSearchParams<{ ticketId?: string | string[] }>();
   const ticketId = Array.isArray(params.ticketId) ? params.ticketId[0] : params.ticketId;
 
@@ -141,16 +143,42 @@ export default function Chat() {
   }, [ticketId]);
 
   useEffect(() => {
-    if (!ticketId || !authToken) return;
+    console.log('[SOCKET] ticketId', ticketId);
+    console.log('[SOCKET] authToken', authToken);
 
-    const baseUrl = api.defaults.baseURL?.replace('/api', '');
-    if (!baseUrl) return;
+    if (!ticketId || !authToken) {
+      console.log('[SOCKET] Abortando conexão');
+      return;
+    }
 
-    const socket = io(`${baseUrl}/ws`, {
+    console.log('[SOCKET] Criando conexão')
+
+    // Conecta ao namespace `/ws` via o path raiz `/socket.io`.
+    // O servidor usa a namespace `ws` no backend.
+    const socket = io(`${api.defaults.baseURL}/ws`, {
+      path: '/socket.io',
       auth: { token: authToken },
+      transports: ['websocket', 'polling'],
     });
 
     socketRef.current = socket;
+
+    socket.on('connect', () => {
+      console.log('[SOCKET] Conectado!', socket.id);
+      socket.emit('joinRoom', { ticketId });
+    });
+
+    socket.on('connect_error', (err) => {
+      console.log('[SOCKET] Erro de conexão:', err.message);
+    });
+
+    socket.on('disconnect', (reason) => {
+      console.log('[SOCKET] Desconectado:', reason);
+    });
+
+    socket.on('socketError', (payload) => {
+      console.log('[SOCKET] Erro do servidor:', payload);
+    });
 
     socket.on('connect', () => {
       socket.emit('joinRoom', { ticketId });

@@ -2,11 +2,16 @@ import Button from '@/components/Button/Button';
 import OrbiAvatar from '@/components/OrbiAvatar/OrbiAvatar';
 import Colors from '@/constants/colors';
 import { globalStyles } from '@/constants/globalStyles';
+import api from '@/services/api';
 import { router } from 'expo-router';
+import Updates from 'expo-updates';
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function Welcome() {
+  console.log('API URL =', process.env.EXPO_PUBLIC_API_URL_ANDROID);
+  console.log('BASE URL =', api.defaults.baseURL);
+  console.log('Updates object', Updates);
   return (
     <View style={styles.container}>
       <OrbiAvatar variant="elipse" size={180} />
